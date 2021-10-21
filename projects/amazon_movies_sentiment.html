@@ -3,10 +3,34 @@
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!--<base href="https://raw.githubusercontent.com/anilcanatik/portfolio/master/SentimentAnalysisAmazonMovie/intro_ml_term_project_anilcan_atik.html">--><base href=".">
 
 <title>Amazon Movies Dataset Sentiment Analysis</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <script src="./amazon_movies_sentiment_files/require.min.js.download"></script>
 <script src="./amazon_movies_sentiment_files/jquery.min.js.download"></script>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+    <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,700" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="css/animate.css">
+
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/magnific-popup.css">
+
+    <link rel="stylesheet" href="css/aos.css">
+
+    <link rel="stylesheet" href="css/ionicons.min.css">
+
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+    <link rel="stylesheet" href="css/jquery.timepicker.css">
+
+
+    <link rel="stylesheet" href="css/flaticon.css">
+    <link rel="stylesheet" href="css/icomoon.css">
+    <link rel="stylesheet" href="css/style.css">
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-174213563-1"></script>
 <script>
@@ -16,7 +40,29 @@
 
   gtag('config', 'UA-174213563-1');
 </script>
+<div id="colorlib-page">
+  <a href="#" class="js-colorlib-nav-toggle colorlib-nav-toggle"><i></i></a>
+  <aside id="colorlib-aside" role="complementary" class="js-fullheight text-center">
+    <h1 id="colorlib-logo"><a href="index.html">content<span><img src="images/icon-atom.svg" width="25" height="25" class="spin"/></span></a></h1>
 
+    <nav id="colorlib-main-menu" role="navigation">
+      <ul>
+        <li class="colorlib-active"><a href="index.html">Home</a></li>
+        <li><a href="works.html">Portfolio</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="colorlib-footer">
+      <p><!-- Link back to Colorlib can't be removed. Template is licensed under CC BY 3.0. -->
+      Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | This template is made with <i aria-hidden="true"></i> by <a href="https://colorlib.com" target="_blank">Colorlib</a>
+      <ul>
+        <li><a href="https://twitter.com/anilcanatik"><i class="icon-twitter"></i></a></li>
+        <li><a href="https://www.linkedin.com/in/anilcana/"><i class="icon-linkedin"></i></a></li>
+      </ul>
+    </div>
+  </aside> <!-- END COLORLIB-ASIDE -->
 
 <style type="text/css">
     /*!
@@ -30,11 +76,7 @@
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
-html {
-  font-family: sans-serif;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%;
-}
+
 body {
   margin: 0;
 }
@@ -9138,15 +9180,15 @@ label {
 }
 /* Flexible box model classes */
 /* Taken from Alex Russell http://infrequently.org/2009/08/css-3-progress/ */
-/* This file is a compatability layer.  It allows the usage of flexible box 
+/* This file is a compatability layer.  It allows the usage of flexible box
 model layouts accross multiple browsers, including older browsers.  The newest,
 universal implementation of the flexible box model is used when available (see
-`Modern browsers` comments below).  Browsers that are known to implement this 
+`Modern browsers` comments below).  Browsers that are known to implement this
 new spec completely include:
 
     Firefox 28.0+
     Chrome 29.0+
-    Internet Explorer 11+ 
+    Internet Explorer 11+
     Opera 17.0+
 
 Browsers not listed, including Safari, are supported via the styling under the
@@ -12528,7 +12570,7 @@ div#pager .ui-resizable-handle {
   background: #f7f7f7;
   border-top: 1px solid #cfcfcf;
   border-bottom: 1px solid #cfcfcf;
-  /* This injects handle bars (a short, wide = symbol) for 
+  /* This injects handle bars (a short, wide = symbol) for
         the resize handle. */
 }
 div#pager .ui-resizable-handle::after {
@@ -13042,14 +13084,14 @@ div#notebook {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 </style>
@@ -13960,7 +14002,7 @@ dtype: int64
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <ul>
-<li>In this data cleaning process, 
+<li>In this data cleaning process,
 I used <strong>nltk wordnet library</strong>, and found bunch of cleaning functions, that fits my pre-processing goals.</li>
 </ul>
 
@@ -13985,7 +14027,7 @@ I used <strong>nltk wordnet library</strong>, and found bunch of cleaning functi
         <span class="k">return</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">ADV</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">wordnet</span><span class="o">.</span><span class="n">NOUN</span>
-    
+
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">from</span> <span class="nn">nltk</span> <span class="k">import</span> <span class="n">pos_tag</span>
 <span class="kn">from</span> <span class="nn">nltk.corpus</span> <span class="k">import</span> <span class="n">stopwords</span>
@@ -14651,7 +14693,7 @@ X_train:
 607255   ...reveals Jerry Seinfeld as a serious and gra...
 
 [34996 rows x 1 columns]
-X_test: 
+X_test:
                                                 reviewText
 407620   This Jane Eyre movie is my favorite of all, be...
 1476511  I knew better and I said so in my review of "L...
@@ -14729,7 +14771,7 @@ X_train:
 960632   Way to go Reese, this movie was like a breath ...
 
 [31436 rows x 1 columns]
-X_test: 
+X_test:
                                                 reviewText
 855068   This was actually a very touching story. The m...
 1413961  Very enjoyable post alien invasion program. A ...
@@ -15084,7 +15126,7 @@ positive, by introducing the review texts and their corresponding positive (+1) 
   </div>
 
 
- 
+
 
 
 
