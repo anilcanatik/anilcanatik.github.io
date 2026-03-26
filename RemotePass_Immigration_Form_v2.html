@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RemotePass Immigration Eligibility Estimator</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rp-blue:#1f57ff;
+  --rp-blue-2:#3b82f6;
+  --rp-navy:#07133d;
+  --rp-ink:#12203f;
+  --rp-muted:#64748b;
+  --rp-line:#e6ecf5;
+  --rp-surface:#ffffff;
+  --rp-surface-soft:#f7faff;
+  --rp-success:#16a34a;
+  --rp-warn:#f59e0b;
+  --rp-danger:#ef4444;
+  --shadow-xl:0 18px 48px rgba(9,23,63,.10);
+  --shadow-md:0 8px 24px rgba(9,23,63,.07);
+}
+body{
+  font-family:'Segoe UI',Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(31,87,255,.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(59,130,246,.10), transparent 28%),
+    linear-gradient(180deg,#f6f9ff 0%,#eef4ff 100%);
+  min-height:100vh;color:var(--rp-ink)
+}
+.shell{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:28px 16px 40px
+}
+
+/* Brand bar */
+.brand-wrap{
+  width:100%;max-width:1280px;display:flex;justify-content:center;margin-bottom:22px
+}
+.brand-bar{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(12px);
+  border:1px solid rgba(17,24,39,.06); border-radius:18px;
+  padding:14px 18px; box-shadow:var(--shadow-md)
+}
+.brand-left{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  display:flex;align-items:center;gap:12px;font-weight:600;color:var(--rp-navy);text-decoration:none
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:12px;
+  background:linear-gradient(135deg,var(--rp-blue),#0b34d9);
+  display:grid;place-items:center;box-shadow:0 10px 20px rgba(31,87,255,.2)
+}
+.brand-mark svg{width:20px;height:20px;display:block}
+.brand-name{font-size:20px;letter-spacing:-.03em}
+.brand-note{font-size:12px;color:var(--rp-muted)}
+.brand-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#eef4ff;border:1px solid #dbe7ff;color:#2144b7;
+  padding:8px 12px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap
+}
+
+/* Hero */
+.hero{
+  width:100%;max-width:1280px;display:block;
+  margin-bottom:18px
+}
+.hero-main{
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.92));
+  border:1px solid rgba(17,24,39,.06); border-radius:24px; box-shadow:var(--shadow-md);
+  padding:26px 30px
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#eef4ff;border:1px solid #dbe7ff;color:#2144b7;
+  font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  padding:7px 14px;border-radius:999px;margin-bottom:16px
+}
+.hero h1{
+  font-size:clamp(28px,4vw,40px);font-weight:600;color:var(--rp-navy);
+  letter-spacing:-.02em;line-height:1.15;margin-bottom:12px
+}
+.hero h1 span{color:var(--rp-blue)}
+.hero p{
+  color:#44516d;font-size:16px;line-height:1.65;max-width:760px;margin-bottom:18px
+}
+.hero-points{display:flex;flex-wrap:wrap;gap:10px}
+.hero-pill{
+  background:#fff;border:1px solid var(--rp-line);border-radius:999px;
+  padding:10px 14px;font-size:13px;font-weight:500;color:#233458
+}
+
+/* Card */
+.card{
+  width:100%;max-width:1280px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-radius:24px;overflow:hidden;box-shadow:var(--shadow-xl);border:1px solid rgba(17,24,39,.06)
+}
+
+/* Progress */
+.prog-bar{background:#fbfdff;padding:24px 34px;border-bottom:1px solid var(--rp-line)}
+.prog-steps{display:flex;align-items:flex-start;gap:0;position:relative}
+.prog-track{position:absolute;top:18px;left:20px;right:20px;height:3px;background:#e5edf8;z-index:0;border-radius:999px}
+.prog-fill{height:3px;background:linear-gradient(90deg,var(--rp-blue),#7aa5ff);transition:width .45s ease;width:0;border-radius:999px}
+.p-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.p-dot{
+  width:40px;height:40px;border-radius:50%;border:2px solid #d8e2f2;background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:600;color:#7a8aa8;transition:all .35s;box-shadow:0 0 0 0 rgba(31,87,255,0)
+}
+.p-step.done .p-dot{background:var(--rp-blue);border-color:var(--rp-blue);color:#fff}
+.p-step.active .p-dot{background:var(--rp-blue);border-color:var(--rp-blue);color:#fff;box-shadow:0 0 0 7px rgba(31,87,255,.12)}
+.p-lbl{font-size:11px;font-weight:600;color:#7a8aa8;margin-top:8px;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.p-step.active .p-lbl,.p-step.done .p-lbl{color:#2144b7}
+
+/* Pages */
+.page{display:none;animation:fadeIn .35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.form-inner{padding:38px 42px 42px}
+.pg-head{margin-bottom:28px}
+.pg-eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#2f58d6;margin-bottom:8px}
+.pg-title{font-size:29px;font-weight:600;color:var(--rp-navy);letter-spacing:-.035em;line-height:1.15;margin-bottom:8px}
+.pg-sub{font-size:15px;color:#5e6d89;line-height:1.7;max-width:720px}
+
+.q-group{margin-bottom:12px}
+.q-group-label{
+  display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#5f6d89;
+  margin:28px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--rp-line)
+}
+.q-group-label span{font-size:15px}
+.field{margin-bottom:18px;transition:opacity .3s,height .3s;overflow:hidden}
+.field.hidden{display:none}
+.field-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+label{font-size:14px;font-weight:500;color:#1f2d4d;line-height:1.45;cursor:pointer}
+.badge-req,.badge-opt{
+  font-size:10px;font-weight:600;padding:4px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;border:1px solid transparent
+}
+.badge-req{background:#eef4ff;color:#2144b7;border-color:#d7e5ff}
+.badge-opt{background:#f8fafc;color:#64748b;border-color:#e5edf5}
+
+select,input[type=text]{
+  width:100%;padding:13px 44px 13px 15px;
+  border:1.5px solid #dbe5f1;border-radius:14px;font-size:14px;color:#1e293b;background:#fff;
+  transition:border-color .2s,box-shadow .2s,transform .1s;
+  appearance:none;-webkit-appearance:none;
+  box-shadow:0 1px 0 rgba(16,24,40,.02);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364758b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center
+}
+input[type=text]{background-image:none;padding-right:14px}
+select:hover,input[type=text]:hover{border-color:#c7d6ea}
+select:focus,input:focus{outline:none;border-color:var(--rp-blue);box-shadow:0 0 0 4px rgba(31,87,255,.10)}
+select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px rgba(239,68,68,.10)}
+.hint{font-size:12px;color:#7a869f;margin-top:6px;line-height:1.5;padding-left:2px}
+.err{font-size:12px;color:var(--rp-danger);margin-top:6px;display:none}
+.err.show{display:block}
+
+.summary-strip{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+.s-pill{
+  background:#f7faff;border:1px solid #e2ebfb;border-radius:999px;padding:8px 14px;font-size:13px;color:#324562;display:flex;align-items:center;gap:6px
+}
+.s-pill strong{color:var(--rp-navy);font-weight:800}
+
+.callout{
+  background:#f5f9ff;border:1px solid #dbe8ff;border-radius:16px;padding:15px 16px;margin-bottom:16px;font-size:13px;color:#25406f;line-height:1.6
+}
+.callout strong{color:#1a4ae0;font-weight:800}
+
+.nav-row{display:flex;gap:12px;margin-top:34px;align-items:center}
+.btn-back,.btn-retry,.btn-restart,.btn-export{
+  background:#fff;color:#334155;border:1.5px solid #d9e4f2;padding:13px 22px;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s
+}
+.btn-back:hover,.btn-retry:hover,.btn-restart:hover,.btn-export:hover{border-color:#b8cae5;background:#f8fbff}
+.btn-primary{
+  flex:1;background:linear-gradient(135deg,var(--rp-blue) 0%,#0b34d9 100%);color:#fff;border:none;
+  padding:15px 28px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .12s,box-shadow .2s,opacity .2s;
+  letter-spacing:.01em;box-shadow:0 14px 30px rgba(31,87,255,.24)
+}
+.btn-primary:hover{opacity:.98;box-shadow:0 16px 34px rgba(31,87,255,.30)}
+.btn-primary:active{transform:translateY(1px)}
+
+.disc{font-size:12px;color:#7a869f;text-align:center;margin-top:16px;line-height:1.7}
+
+.results-wrap{padding:38px 34px}
+.loading-state{text-align:center;padding:50px 0}
+.spin-ring{
+  width:56px;height:56px;border:4px solid #edf2ff;border-top-color:var(--rp-blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-size:20px;font-weight:600;color:var(--rp-navy);margin-bottom:8px;letter-spacing:-.02em}
+.loading-sub{font-size:13px;color:#7a869f}
+.steps-anim{display:flex;flex-direction:column;gap:9px;margin:24px auto 0;max-width:320px;text-align:left}
+.step-anim{display:flex;align-items:center;gap:10px;font-size:13px;color:#71819d;opacity:.45;transition:opacity .4s}
+.step-anim.lit{opacity:1;color:#2144b7;font-weight:700}
+.step-anim .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+.error-state{display:none;text-align:center;padding:46px 0}
+.error-state.show{display:block}
+.err-ico{font-size:52px;margin-bottom:16px}
+.err-title{font-size:22px;font-weight:600;color:var(--rp-navy);margin-bottom:8px}
+.err-msg{font-size:14px;color:#5f6d89;line-height:1.7;margin-bottom:24px}
+
+.result-state{display:none}
+.result-state.show{display:block}
+.result-body{line-height:1.75;overflow-x:visible}
+.result-body h2,.result-body h3{color:var(--rp-navy);font-weight:600;margin:22px 0 10px}
+.result-body h2{font-size:21px}
+.result-body h3{font-size:17px}
+.result-body p{color:#2f3f5f;font-size:14px;margin-bottom:12px}
+.result-body ul{margin:0 0 12px 20px}
+.result-body li{color:#2f3f5f;font-size:14px;margin-bottom:5px}
+.result-body table{
+  width:100%;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border-collapse:separate;border-spacing:0;margin:18px 0;font-size:14px;border:1px solid var(--rp-line);border-radius:16px;overflow:hidden;
+  min-width:1080px;background:#fff
+}
+.result-body th{background:var(--rp-navy);color:#f8fbff;padding:14px 16px;text-align:left;font-size:13px;font-weight:700;vertical-align:top}
+.result-body td{padding:14px 16px;border-bottom:1px solid #eef2f8;color:#334155;background:#fff;vertical-align:top}
+.result-body tr:last-child td{border-bottom:none}
+.result-body tr:nth-child(even) td{background:#f9fbff}
+.result-body th:nth-child(1),.result-body td:nth-child(1){min-width:170px}
+.result-body th:nth-child(2),.result-body td:nth-child(2){min-width:110px}
+.result-body th:nth-child(3),.result-body td:nth-child(3){min-width:250px}
+.result-body th:nth-child(4),.result-body td:nth-child(4){min-width:320px}
+.result-body th:nth-child(5),.result-body td:nth-child(5){min-width:170px}
+.result-body .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.result-body .green{background:#dcfce7;color:#166534}
+.result-body .yellow{background:#dcfce7;color:#166534}
+.result-body .red{background:#fee2e2;color:#991b1b}
+
+.restart-row{margin-top:34px;text-align:center;padding-top:26px;border-top:1px solid var(--rp-line)}
+.action-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-export{background:var(--rp-navy);color:#fff;border:1.5px solid var(--rp-navy)}
+.btn-export:hover{background:#0c1d56;border-color:#0c1d56}
+
+/* Footer */
+.footer{
+  width:100%;max-width:1280px;color:#5f6d89;font-size:12px;margin-top:20px;text-align:center;line-height:1.8;
+  padding:18px 16px 0
+}
+.footer a{color:#2144b7;text-decoration:none;font-weight:700}
+.footer strong{color:var(--rp-navy)}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .brand-bar{padding:14px}
+  .brand-note{display:none}
+  .brand-chip{display:none}
+  .hero-main{border-radius:22px}
+  .form-inner,.results-wrap{padding:24px 20px 28px}
+  .prog-bar{padding:18px 20px}
+  .nav-row{flex-direction:column}
+  .btn-back,.btn-primary{width:100%}
+  .hero-main{padding:24px 22px}
+  .hero-stats{grid-template-columns:1fr}
+  .result-body table{min-width:820px;font-size:13px}
+  .result-body th,.result-body td{padding:12px 12px}
+  .action-row{flex-direction:column}
+  .btn-export,.btn-restart{width:100%}
+}
+
+@media print{
+  body{background:#fff}
+  .hero,.progress-shell,.footer,.restart-row,#loadingState,#errorState{display:none!important}
+  .shell,.card,.result-state,.results-wrap,.result-body{box-shadow:none!important;background:#fff!important;border:none!important;max-width:none!important;padding:0!important;margin:0!important}
+  #page1,#page2{display:none!important}
+  #page3{display:block!important}
+  .page{display:none!important}
+  #page3.page{display:block!important}
+  .result-body *{color:#000!important}
+  .result-body a{text-decoration:underline!important;color:#000!important}
+}
+</style>
+
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="brand-wrap">
+    <div class="brand-bar">
+      <div class="brand-left">
+        <a class="brand-logo" href="https://www.remotepass.com/" target="_blank" rel="noopener noreferrer" aria-label="RemotePass">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3.5a6.75 6.75 0 0 0-4.85 11.45l1.38 1.42-1.03 1.04-1.42-1.46A8.75 8.75 0 1 1 20.75 10c0 2.35-.92 4.55-2.6 6.2L12 22.35l-5.06-5.18 1.43-1.4L12 19.46l4.72-4.8A6.75 6.75 0 0 0 12 3.5Zm0 3.35a3.4 3.4 0 0 1 2.41 5.8L12 15.1l-2.41-2.45A3.4 3.4 0 0 1 12 6.85Z" fill="white"/>
+            </svg>
+          </span>
+          <span>
+            <span class="brand-name">RemotePass</span><br>
+            <span class="brand-note">Global mobility, payroll and relocation</span>
+          </span>
+        </a>
+      </div>
+      <div class="brand-chip">RemotePass Internal Tool</div>
+    </div>
+  </div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-badge">RemotePass · Internal tool</div>
+      <h1>Immigration eligibility,<br><span>presented the RemotePass way</span></h1>
+      <p>Help candidates and team members understand likely visa pathways, eligibility signals, and expected timelines through a cleaner, more premium RemotePass-branded experience.</p>
+      <div class="hero-points">
+      </div>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+
+    <!-- Progress -->
+    <div class="prog-bar">
+      <div class="prog-steps">
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <div class="p-step active" id="ps1">
+          <div class="p-dot">1</div>
+          <div class="p-lbl">Destination</div>
+        </div>
+        <div class="p-step" id="ps2">
+          <div class="p-dot">2</div>
+          <div class="p-lbl">Your Profile</div>
+        </div>
+        <div class="p-step" id="ps3">
+          <div class="p-dot">3</div>
+          <div class="p-lbl">Results</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ PAGE 1 — DESTINATION ══════════════════ -->
+    <div class="page active" id="page1">
+      <div class="form-inner">
+        <div class="pg-head">
+          <div class="pg-eyebrow">Step 1 of 2</div>
+          <div class="pg-title">Where are you planning to move?</div>
+          <div class="pg-sub">We'll personalise the next questions based on your destination and purpose.</div>
+        </div>
+
+        <!-- Q01: Country -->
+        <div class="field" id="f-country">
+          <div class="field-head">
+            <label for="country">🌍 Destination country</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="country" onchange="onCountryPurposeChange()">
+            <option value="" disabled selected>Select a country…</option>
+            <option value="Switzerland">🇨🇭  Switzerland</option>
+            <option value="United Kingdom">🇬🇧  United Kingdom</option>
+            <option value="Germany">🇩🇪  Germany</option>
+            <option value="Portugal">🇵🇹  Portugal</option>
+            <option value="Spain">🇪🇸  Spain</option>
+            <option value="USA">🇺🇸  USA</option>
+            <option value="UAE">🇦🇪  UAE</option>
+            <option value="Saudi Arabia">🇸🇦  Saudi Arabia</option>
+            <option value="Qatar">🇶🇦  Qatar</option>
+            <option value="Oman">🇴🇲  Oman</option>
+          </select>
+          <div class="err" id="e-country">Please select a destination country.</div>
+        </div>
+
+        <!-- Q02: Nationality -->
+        <div class="field" id="f-nationality">
+          <div class="field-head">
+            <label for="nationality">🛂 Your current nationality</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="nationality">
+            <option value="" disabled selected>Select your nationality…</option>
+            <option value="EU / EEA national">🇪🇺  EU / EEA national</option>
+            <option value="Swiss national">🇨🇭  Swiss national</option>
+            <option value="UK national">🇬🇧  UK national</option>
+            <option value="US or Canadian national">🇺🇸  US or Canadian national</option>
+            <option value="Australian or New Zealand national">🇦🇺  Australian or New Zealand national</option>
+            <option value="GCC national">🌙  GCC national (UAE, KSA, Qatar, Kuwait, Bahrain, Oman)</option>
+            <option value="Indian national">🇮🇳  Indian national</option>
+            <option value="Chinese national">🇨🇳  Chinese national</option>
+            <option value="Turkish national">🇹🇷  Turkish national</option>
+            <option value="Other">🌐  Other nationality</option>
+          </select>
+          <div class="err" id="e-nationality">Please select your nationality.</div>
+        </div>
+
+        <!-- Q03: Purpose -->
+        <div class="field" id="f-purpose">
+          <div class="field-head">
+            <label for="purpose">🎯 Main reason for moving</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="purpose" onchange="onCountryPurposeChange()">
+            <option value="" disabled selected>Select your purpose…</option>
+            <option value="work_employed">💼  Work for an employer</option>
+            <option value="self_employed">🧑‍💻  Self-employment or freelancing</option>
+            <option value="business">🏢  Start or run a business</option>
+            <option value="study">🎓  Study at a university or college</option>
+            <option value="retire">🌴  Retire or live on passive income</option>
+            <option value="digital_nomad">💻  Work remotely (digital nomad)</option>
+            <option value="join_family">👨‍👩‍👧  Join a family member already there</option>
+            <option value="investment">📈  Make an investment</option>
+          </select>
+          <div class="err" id="e-purpose">Please select your main purpose.</div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-primary" onclick="goPage2()">Continue  →</button>
+        </div>
+      </div>
+    </div><!-- /page1 -->
+
+
+    <!-- ════════════════ PAGE 2 — PROFILE ════════════════════════ -->
+    <div class="page" id="page2">
+      <div class="form-inner">
+        <div class="pg-head">
+          <div class="pg-eyebrow">Step 2 of 2</div>
+          <div class="pg-title">Tell us about your profile</div>
+          <div class="pg-sub">Only questions relevant to your destination and purpose are shown.</div>
+        </div>
+
+        <!-- Page 1 summary pills -->
+        <div class="summary-strip" id="summaryStrip"></div>
+
+        <!-- ══ EMPLOYMENT ══ -->
+        <div class="q-group" id="grp-employment" style="display:none">
+          <div class="q-group-label"><span>💼</span> Employment</div>
+
+          <!-- Q04: Employment Status -->
+          <div class="field hidden" id="f-employment">
+            <div class="field-head">
+              <label for="employment">What is your current employment situation?</label>
+              <span class="badge-req" id="b-employment">Required</span>
+            </div>
+            <select id="employment">
+              <option value="" disabled selected>Select…</option>
+              <option value="Confirmed job offer with sponsorship">Confirmed job offer (employer will sponsor)</option>
+              <option value="Potential job offer, no sponsorship confirmed">Potential job offer — sponsorship not confirmed yet</option>
+              <option value="Self-employed / freelance">Self-employed or freelance</option>
+              <option value="Remote worker for foreign company">Remote worker for a company outside the destination country</option>
+              <option value="Actively looking for work">Actively looking for work</option>
+              <option value="Student">Student</option>
+              <option value="Retired / passive income">Retired or living on passive income</option>
+              <option value="Business owner">Running my own business</option>
+            </select>
+            <div class="err" id="e-employment">Please select your employment situation.</div>
+          </div>
+
+          <!-- Q09: Work Experience -->
+          <div class="field hidden" id="f-work_experience">
+            <div class="field-head">
+              <label for="work_experience">Years of relevant work experience</label>
+              <span class="badge-opt" id="b-work_experience">Optional</span>
+            </div>
+            <select id="work_experience">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="0 – 1 years">0 – 1 years</option>
+              <option value="1 – 3 years">1 – 3 years</option>
+              <option value="3 – 5 years">3 – 5 years</option>
+              <option value="5 – 10 years">5 – 10 years</option>
+              <option value="Over 10 years">Over 10 years</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ══ FINANCES ══ -->
+        <div class="q-group" id="grp-finances" style="display:none">
+          <div class="q-group-label"><span>💰</span> Finances</div>
+
+          <!-- Q05: Monthly Income -->
+          <div class="field hidden" id="f-income">
+            <div class="field-head">
+              <label for="income">Approximate monthly gross income</label>
+              <span class="badge-req" id="b-income">Required</span>
+            </div>
+            <select id="income">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="Under €1,000 / month">Under €1,000 / month</option>
+              <option value="€1,000 – €2,000 / month">€1,000 – €2,000 / month</option>
+              <option value="€2,000 – €3,500 / month">€2,000 – €3,500 / month</option>
+              <option value="€3,500 – €5,000 / month">€3,500 – €5,000 / month</option>
+              <option value="€5,000 – €10,000 / month">€5,000 – €10,000 / month</option>
+              <option value="Over €10,000 / month">Over €10,000 / month</option>
+              <option value="No active income (passive / investment only)">No active income — passive / investment only</option>
+            </select>
+            <p class="hint">EUR / GBP / CHF / USD equivalent</p>
+          </div>
+
+          <!-- Q06: Passive Income -->
+          <div class="field hidden" id="f-passive_income">
+            <div class="field-head">
+              <label for="passive_income">Do you have a source of passive income?</label>
+              <span class="badge-opt" id="b-passive_income">Optional</span>
+            </div>
+            <select id="passive_income">
+              <option value="No">No</option>
+              <option value="Yes — pension">Yes — pension</option>
+              <option value="Yes — rental income">Yes — rental income</option>
+              <option value="Yes — dividends or investments">Yes — dividends or investments</option>
+              <option value="Yes — other passive income">Yes — other passive income</option>
+            </select>
+            <p class="hint">e.g. pension, rental, dividends</p>
+          </div>
+
+          <!-- Q07: Savings -->
+          <div class="field hidden" id="f-savings">
+            <div class="field-head">
+              <label for="savings">Savings or liquid assets</label>
+              <span class="badge-opt" id="b-savings">Optional</span>
+            </div>
+            <select id="savings">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="Under €10,000">Under €10,000</option>
+              <option value="€10,000 – €50,000">€10,000 – €50,000</option>
+              <option value="€50,000 – €100,000">€50,000 – €100,000</option>
+              <option value="€100,000 – €500,000">€100,000 – €500,000</option>
+              <option value="Over €500,000">Over €500,000</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ══ EDUCATION & SKILLS ══ -->
+        <div class="q-group" id="grp-education" style="display:none">
+          <div class="q-group-label"><span>🎓</span> Education &amp; Skills</div>
+
+          <!-- Q08: Education Level -->
+          <div class="field hidden" id="f-education">
+            <div class="field-head">
+              <label for="education">Highest level of education</label>
+              <span class="badge-opt" id="b-education">Optional</span>
+            </div>
+            <select id="education">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="No formal qualification">No formal qualification</option>
+              <option value="Secondary school (high school diploma)">Secondary school / high school diploma</option>
+              <option value="Vocational training or apprenticeship">Vocational training or apprenticeship</option>
+              <option value="Bachelor's degree">Bachelor's degree</option>
+              <option value="Master's degree">Master's degree</option>
+              <option value="PhD or Doctorate">PhD or Doctorate</option>
+            </select>
+          </div>
+
+          <!-- Q10: Languages -->
+          <div class="field hidden" id="f-languages">
+            <div class="field-head">
+              <label for="languages">Languages you speak (conversational or higher)</label>
+              <span class="badge-opt" id="b-languages">Optional</span>
+            </div>
+            <input type="text" id="languages" placeholder="e.g. English (fluent), German (B2), Spanish (basic)">
+          </div>
+        </div>
+
+        <!-- ══ FAMILY ══ -->
+        <div class="q-group" id="grp-family" style="display:none">
+          <div class="q-group-label"><span>👨‍👩‍👧</span> Family</div>
+
+          <!-- Q11: Bringing Family -->
+          <div class="field hidden" id="f-family">
+            <div class="field-head">
+              <label for="family">Are you planning to bring family members?</label>
+              <span class="badge-opt" id="b-family">Optional</span>
+            </div>
+            <select id="family">
+              <option value="No">No</option>
+              <option value="Yes — spouse or partner only">Yes — spouse or partner only</option>
+              <option value="Yes — spouse / partner and children">Yes — spouse / partner and children</option>
+              <option value="Yes — children only">Yes — children only</option>
+            </select>
+          </div>
+
+          <!-- Q12: Marital Status -->
+          <div class="field hidden" id="f-marital_status">
+            <div class="field-head">
+              <label for="marital_status">Marital status</label>
+              <span class="badge-opt" id="b-marital_status">Optional</span>
+            </div>
+            <select id="marital_status">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="Single">Single</option>
+              <option value="Married">Married</option>
+              <option value="Civil partnership / registered partner">Civil partnership / registered partner</option>
+              <option value="Unmarried partner (2+ years cohabitation)">Unmarried partner (2+ years together)</option>
+              <option value="Divorced">Divorced</option>
+              <option value="Widowed">Widowed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- ══ COUNTRY-SPECIFIC ══ -->
+        <div class="q-group" id="grp-specific" style="display:none">
+          <div class="q-group-label"><span>📍</span> Country-specific questions</div>
+
+          <!-- Q18: Employer Sponsor Licence -->
+          <div class="field hidden" id="f-employer_sponsor">
+            <div class="field-head">
+              <label for="employer_sponsor" id="lbl-employer_sponsor">Does your employer hold a valid sponsor licence?</label>
+              <span class="badge-req" id="b-employer_sponsor">Required</span>
+            </div>
+            <select id="employer_sponsor">
+              <option value="" disabled selected>Select…</option>
+              <option value="Yes">Yes</option>
+              <option value="No">No</option>
+              <option value="I don't know">I don't know</option>
+              <option value="Not applicable">Not applicable</option>
+            </select>
+            <div class="err" id="e-employer_sponsor">Please answer this question.</div>
+          </div>
+
+          <!-- Germany qualification recognition -->
+          <div class="field hidden" id="f-qualification_recognition">
+            <div class="field-head">
+              <label for="qualification_recognition">Has your foreign qualification been officially recognised in Germany (Anerkennung)?</label>
+              <span class="badge-opt" id="b-qualification_recognition">Optional</span>
+            </div>
+            <select id="qualification_recognition">
+              <option value="Not applicable">Not applicable / EU national</option>
+              <option value="Yes — already recognised">Yes — already recognised</option>
+              <option value="In progress">In progress</option>
+              <option value="Not yet started">Not yet started</option>
+            </select>
+            <p class="hint">Required for most regulated professions in Germany</p>
+          </div>
+
+          <!-- Portugal / Spain passive income source -->
+          <div class="field hidden" id="f-passive_income_source">
+            <div class="field-head">
+              <label for="passive_income_source">What is the source of your passive income?</label>
+              <span class="badge-opt" id="b-passive_income_source">Optional</span>
+            </div>
+            <select id="passive_income_source">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="State or private pension">State or private pension</option>
+              <option value="Rental income from property">Rental income from property</option>
+              <option value="Dividends or investment returns">Dividends or investment returns</option>
+              <option value="Remote salary from foreign employer">Remote salary from foreign employer</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+
+          <!-- Q19: Investment Amount (Gulf countries) -->
+          <div class="field hidden" id="f-investment_amount">
+            <div class="field-head">
+              <label for="investment_amount">Approximate value of intended investment or property purchase</label>
+              <span class="badge-opt" id="b-investment_amount">Optional</span>
+            </div>
+            <select id="investment_amount">
+              <option value="Not specified">Prefer not to say</option>
+              <option value="Under €100,000">Under €100,000</option>
+              <option value="€100,000 – €500,000">€100,000 – €500,000</option>
+              <option value="€500,000 – €1,000,000">€500,000 – €1,000,000</option>
+              <option value="€1,000,000 – €2,000,000">€1,000,000 – €2,000,000</option>
+              <option value="Over €2,000,000">Over €2,000,000</option>
+            </select>
+          </div>
+
+          <!-- Q20: Study Offer -->
+          <div class="field hidden" id="f-study_offer">
+            <div class="field-head">
+              <label for="study_offer">Have you received an acceptance offer from a university or institution?</label>
+              <span class="badge-req" id="b-study_offer">Required</span>
+            </div>
+            <select id="study_offer">
+              <option value="" disabled selected>Select…</option>
+              <option value="Yes — confirmed offer">Yes — confirmed offer</option>
+              <option value="Still applying">Still applying</option>
+              <option value="Still exploring options">Still exploring options</option>
+            </select>
+            <div class="err" id="e-study_offer">Please answer this question.</div>
+          </div>
+        </div>
+
+        <!-- ══ PLANS & BACKGROUND ══ (always shown in page 2) -->
+        <div class="q-group">
+          <div class="q-group-label"><span>📋</span> Plans &amp; Background</div>
+
+          <!-- Q13: Duration -->
+          <div class="field" id="f-duration">
+            <div class="field-head">
+              <label for="duration">How long are you planning to stay?</label>
+              <span class="badge-req">Required</span>
+            </div>
+            <select id="duration">
+              <option value="" disabled selected>Select…</option>
+              <option value="Up to 3 months">Up to 3 months (short visit)</option>
+              <option value="3 to 12 months">3 to 12 months</option>
+              <option value="1 to 2 years">1 to 2 years</option>
+              <option value="2 to 5 years">2 to 5 years</option>
+              <option value="Permanently">Permanently / long-term</option>
+            </select>
+            <div class="err" id="e-duration">Please select your intended length of stay.</div>
+          </div>
+
+          <!-- Q17: Health Insurance -->
+          <div class="field" id="f-health_insurance">
+            <div class="field-head">
+              <label for="health_insurance">Do you have or can you obtain health insurance in the destination country?</label>
+              <span class="badge-opt">Optional</span>
+            </div>
+            <select id="health_insurance">
+              <option value="Yes — private">Yes — private insurance</option>
+              <option value="Yes — through employer">Yes — through employer</option>
+              <option value="No">No</option>
+              <option value="Unsure">Unsure</option>
+            </select>
+          </div>
+
+          <!-- Q15: Criminal Record -->
+          <div class="field" id="f-criminal_record">
+            <div class="field-head">
+              <label for="criminal_record">Do you have any criminal convictions?</label>
+              <span class="badge-req">Required</span>
+            </div>
+            <select id="criminal_record">
+              <option value="" disabled selected>Select…</option>
+              <option value="No">No</option>
+              <option value="Yes — minor offence">Yes — minor offence</option>
+              <option value="Yes — serious offence">Yes — serious offence</option>
+            </select>
+            <div class="err" id="e-criminal_record">Please answer this question.</div>
+          </div>
+
+          <!-- Q16: Visa Issues -->
+          <div class="field" id="f-visa_issues">
+            <div class="field-head">
+              <label for="visa_issues">Have you ever had a visa refused, been deported, or overstayed?</label>
+              <span class="badge-req">Required</span>
+            </div>
+            <select id="visa_issues">
+              <option value="" disabled selected>Select…</option>
+              <option value="No">No</option>
+              <option value="Yes — visa refusal">Yes — visa refusal</option>
+              <option value="Yes — deportation or removal">Yes — deportation or removal</option>
+              <option value="Yes — overstayed a visa">Yes — overstayed a visa</option>
+            </select>
+            <div class="err" id="e-visa_issues">Please answer this question.</div>
+          </div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="goPage1()">← Back</button>
+          <button class="btn-primary" onclick="submitForm()">Get My Assessment →</button>
+        </div>
+        <p class="disc">Your answers are processed securely and not stored. This estimate is for guidance only and does not replace formal immigration advice.</p>
+      </div>
+    </div><!-- /page2 -->
+
+
+    <!-- ════════════════ PAGE 3 — RESULTS ════════════════════════ -->
+    <div class="page" id="page3">
+      <div class="results-wrap">
+
+        <!-- Loading -->
+        <div class="loading-state" id="loadingState">
+          <div class="spin-ring"></div>
+          <div class="loading-title">Preparing your RemotePass assessment…</div>
+          <div class="loading-sub">This usually takes 15–30 seconds</div>
+          <div class="steps-anim" id="stepsAnim">
+            <div class="step-anim lit" id="sa1"><div class="dot"></div>Matching likely visa pathways</div>
+            <div class="step-anim" id="sa2"><div class="dot"></div>Reviewing key eligibility criteria</div>
+            <div class="step-anim" id="sa3"><div class="dot"></div>Estimating timelines and effort</div>
+            <div class="step-anim" id="sa4"><div class="dot"></div>Formatting your personalised report</div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-state" id="errorState">
+          <div class="err-ico">⚠️</div>
+          <div class="err-title">Something went wrong</div>
+          <p class="err-msg" id="errMsg">We couldn't reach the assessment service. Please check your connection and try again.</p>
+          <button class="btn-retry" onclick="retryCall()">Try Again</button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-state" id="resultState">
+          <div class="result-body" id="resultBody"></div>
+          <div class="restart-row action-row">
+            <button class="btn-export" onclick="exportReport()">Export report</button>
+            <button class="btn-restart" onclick="restart()">← Start a New Assessment</button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page3 -->
+
+  </div><!-- /card -->
+
+  
+  <div class="footer">
+    Powered by RemotePass · Not legal advice, estimates provided might change. Always consult a licensed immigration advisor for case-specific guidance. (26032)
+  </div>
+
+</div><!-- /shell -->
+
+
+<script>
+// ══════════════════════════════════════════════════════════════
+//  WEBHOOK URL — replace with your n8n webhook Production URL
+//  e.g. https://your-n8n.app.n8n.cloud/webhook/xxxx
+//  Also add CORS headers to the "Respond to Webhook" node:
+//    Access-Control-Allow-Origin  →  *
+//    Access-Control-Allow-Methods →  POST, OPTIONS
+//    Access-Control-Allow-Headers →  Content-Type
+// ══════════════════════════════════════════════════════════════
+const WEBHOOK_URL = 'PASTE_WEBHOOK_URL_HERE';
+
+// ──────────────────────────────────────────────────────────────
+//  QUESTION MAP — extracted from Immigration_Visa_Database.xlsx
+//  Question Map sheet. Legend: ● = required, ○ = optional, — = hidden
+//  Keys: Q04=Employment, Q05=Income, Q06=PassiveIncome, Q07=Savings,
+//        Q08=Education, Q09=WorkExp, Q10=Languages, Q11=Family,
+//        Q12=MaritalStatus, Q13=Duration(always), Q15=Criminal(always),
+//        Q16=VisaIssues(always), Q17=HealthIns(always),
+//        Q18=EmployerSponsor, Q19=InvestmentAmt, Q20=StudyOffer
+// ──────────────────────────────────────────────────────────────
+const QMAP = {
+  "Switzerland":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"●","Q07":"—","Q08":"—","Q09":"○","Q10":"○","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"○","Q09":"●","Q10":"○","Q11":"○","Q12":"—","Q18":"●","Q19":"○","Q20":"—"},
+    "study":{"Q04":"—","Q05":"—","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"—","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"●","Q07":"—","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"—","Q10":"○","Q11":"○","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "United Kingdom":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"●","Q08":"●","Q09":"○","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"○","Q20":"—"},
+    "business":{"Q04":"●","Q05":"○","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"●"},
+    "study":{"Q04":"—","Q05":"●","Q06":"—","Q07":"●","Q08":"●","Q09":"—","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"●","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"●","Q10":"○","Q11":"○","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "Germany":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"●","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "study":{"Q04":"—","Q05":"—","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"—","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"●","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"●","Q10":"○","Q11":"○","Q12":"○","Q18":"●","Q19":"○","Q20":"—"}
+  },
+  "Portugal":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"○","Q09":"○","Q10":"○","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"○","Q09":"○","Q10":"●","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "retire":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"—","Q20":"—"},
+    "digital_nomad":{"Q04":"●","Q05":"●","Q06":"○","Q07":"○","Q08":"—","Q09":"—","Q10":"○","Q11":"—","Q12":"○","Q18":"—","Q19":"—","Q20":"—"},
+    "study":{"Q04":"—","Q05":"—","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"—","Q11":"○","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"—","Q10":"○","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "Spain":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"○","Q11":"○","Q12":"—","Q18":"●","Q19":"—","Q20":"—"},
+    "retire":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"—","Q20":"—"},
+    "digital_nomad":{"Q04":"●","Q05":"●","Q06":"○","Q07":"○","Q08":"—","Q09":"—","Q10":"○","Q11":"—","Q12":"○","Q18":"—","Q19":"—","Q20":"—"},
+    "study":{"Q04":"—","Q05":"—","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"—","Q11":"○","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"—","Q10":"○","Q11":"○","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "USA":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"●","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"●","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "business":{"Q04":"●","Q05":"○","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"●","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"●"},
+    "investment":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"●"},
+    "study":{"Q04":"—","Q05":"—","Q06":"—","Q07":"—","Q08":"●","Q09":"●","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "UAE":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "self_employed":{"Q04":"●","Q05":"●","Q06":"○","Q07":"●","Q08":"●","Q09":"●","Q10":"○","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"—"},
+    "business":{"Q04":"●","Q05":"○","Q06":"○","Q07":"●","Q08":"○","Q09":"○","Q10":"○","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"●"},
+    "investment":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"●","Q20":"●"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"○","Q10":"○","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"○"}
+  },
+  "Saudi Arabia":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "investment":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"●","Q20":"●"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"—"}
+  },
+  "Qatar":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "investment":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"●","Q20":"●"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"—"}
+  },
+  "Oman":{
+    "work_employed":{"Q04":"●","Q05":"●","Q06":"—","Q07":"—","Q08":"●","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"—","Q20":"—"},
+    "investment":{"Q04":"—","Q05":"—","Q06":"○","Q07":"●","Q08":"●","Q09":"—","Q10":"—","Q11":"—","Q12":"○","Q18":"—","Q19":"●","Q20":"●"},
+    "join_family":{"Q04":"—","Q05":"—","Q06":"—","Q07":"●","Q08":"—","Q09":"—","Q10":"—","Q11":"—","Q12":"●","Q18":"●","Q19":"—","Q20":"—"},
+    "_all":{"Q04":"●","Q05":"○","Q06":"○","Q07":"○","Q08":"○","Q09":"○","Q10":"—","Q11":"—","Q12":"○","Q18":"●","Q19":"○","Q20":"—"}
+  }
+};
+
+// Maps form field IDs to Question Map keys and their groups
+const FIELD_CFG = {
+  employment:           { qKey:'Q04', group:'grp-employment' },
+  work_experience:      { qKey:'Q09', group:'grp-employment' },
+  income:               { qKey:'Q05', group:'grp-finances'   },
+  passive_income:       { qKey:'Q06', group:'grp-finances'   },
+  savings:              { qKey:'Q07', group:'grp-finances'   },
+  education:            { qKey:'Q08', group:'grp-education'  },
+  languages:            { qKey:'Q10', group:'grp-education'  },
+  family:               { qKey:'Q11', group:'grp-family'     },
+  marital_status:       { qKey:'Q12', group:'grp-family'     },
+  employer_sponsor:     { qKey:'Q18', group:'grp-specific'   },
+  investment_amount:    { qKey:'Q19', group:'grp-specific'   },
+  study_offer:          { qKey:'Q20', group:'grp-specific'   },
+  qualification_recognition: { qKey:'_germany_work', group:'grp-specific' },
+  passive_income_source:     { qKey:'_pt_es_passive', group:'grp-specific' }
+};
+
+// Employer sponsor label override by country
+const SPONSOR_LABELS = {
+  'United Kingdom': 'Does your UK employer hold a valid Skilled Worker sponsor licence?',
+  'Switzerland':    'Is your employer based in Switzerland and registered with Swiss authorities?',
+  'UAE':            'Does your employer in the UAE hold a valid commercial licence to act as your visa sponsor? (kafala system)',
+  'Saudi Arabia':   'Does your employer in Saudi Arabia hold a valid commercial licence to act as your visa sponsor? (kafala system)',
+  'Qatar':          'Does your employer in Qatar hold a valid commercial licence to act as your visa sponsor? (kafala system)',
+  'Oman':           'Does your employer in Oman hold a valid commercial licence to act as your visa sponsor? (kafala system)',
+  'USA':            'Is your employer willing to sponsor your US work visa and file the petition on your behalf?',
+  'Germany':        'Does your employer have a valid employment offer that meets German salary requirements?',
+};
+
+// ─── State ────────────────────────────────────────────────────
+let formData = {};
+let currentViz = {};  // field_id → '●' | '○' | '—'
+
+// ─── Country / Purpose change → compute visibility ────────────
+function onCountryPurposeChange() {
+  const country = v('country');
+  const purpose = v('purpose');
+  if (!country || !purpose) return;
+
+  const map = QMAP[country] || {};
+  const rules = map[purpose] || map['_all'] || {};
+  currentViz = rules;
+
+  // Update employer sponsor label
+  const lbl = SPONSOR_LABELS[country];
+  if (lbl) document.getElementById('lbl-employer_sponsor').textContent = lbl;
+
+  // Show Germany-specific qualification field
+  const isGermanyWork = (country === 'Germany' && (purpose === 'work_employed' || purpose === 'self_employed'));
+  setField('qualification_recognition', isGermanyWork ? '○' : '—');
+
+  // Show Portugal/Spain passive income source for retire/digital_nomad
+  const isPtEsPassive = (['Portugal','Spain'].includes(country) && ['retire','digital_nomad'].includes(purpose));
+  setField('passive_income_source', isPtEsPassive ? '○' : '—');
+}
+
+function setField(fieldId, vis) {
+  currentViz['_' + fieldId] = vis; // store override
+  applyViz(fieldId, vis);
+}
+
+// ─── Apply visibility to a single field ───────────────────────
+function applyViz(fieldId, vis) {
+  const el = document.getElementById('f-' + fieldId);
+  const badge = document.getElementById('b-' + fieldId);
+  if (!el) return;
+
+  if (vis === '—') {
+    el.classList.add('hidden');
+  } else {
+    el.classList.remove('hidden');
+    if (badge) {
+      badge.textContent = vis === '●' ? 'Required' : 'Optional';
+      badge.className = vis === '●' ? 'badge-req' : 'badge-opt';
+    }
+  }
+}
+
+// ─── Compute and apply all visibilities ──────────────────────
+function applyAllViz() {
+  const country = v('country');
+  const purpose = v('purpose');
+  if (!country || !purpose) return;
+
+  const map = QMAP[country] || {};
+  const rules = { ...(map['_all'] || {}), ...(map[purpose] || {}) };
+  currentViz = rules;
+
+  Object.entries(FIELD_CFG).forEach(([fieldId, cfg]) => {
+    const vis = rules[cfg.qKey] || '—';
+    applyViz(fieldId, vis);
+  });
+
+  // Germany qualification
+  const isGermanyWork = (country === 'Germany' && ['work_employed','self_employed'].includes(purpose));
+  applyViz('qualification_recognition', isGermanyWork ? '○' : '—');
+
+  // Portugal/Spain passive income source
+  const isPtEsPassive = (['Portugal','Spain'].includes(country) && ['retire','digital_nomad'].includes(purpose));
+  applyViz('passive_income_source', isPtEsPassive ? '○' : '—');
+
+  // Update employer sponsor label
+  const lbl = SPONSOR_LABELS[country];
+  if (lbl) document.getElementById('lbl-employer_sponsor').textContent = lbl;
+
+  // Show/hide groups
+  ['grp-employment','grp-finances','grp-education','grp-family','grp-specific'].forEach(grpId => {
+    const grp = document.getElementById(grpId);
+    if (!grp) return;
+    // Group is visible if at least one child field is visible
+    const anyVisible = [...grp.querySelectorAll('.field')].some(f => !f.classList.contains('hidden'));
+    grp.style.display = anyVisible ? 'block' : 'none';
+  });
+}
+
+// ─── Page 1 → Page 2 ──────────────────────────────────────────
+function goPage2() {
+  const country     = v('country');
+  const nationality = v('nationality');
+  const purpose     = v('purpose');
+  let ok = true;
+  if (!country)    { markErr('country','e-country');       ok=false; } else clearErr('country','e-country');
+  if (!nationality){ markErr('nationality','e-nationality');ok=false; } else clearErr('nationality','e-nationality');
+  if (!purpose)    { markErr('purpose','e-purpose');        ok=false; } else clearErr('purpose','e-purpose');
+  if (!ok) return;
+
+  formData.country     = country;
+  formData.nationality = nationality;
+  formData.purpose     = purpose;
+
+  // Build summary strip
+  const purposeLabel = selText('purpose');
+  const flagMap = {Switzerland:'🇨🇭',  'United Kingdom':'🇬🇧', Germany:'🇩🇪', Portugal:'🇵🇹',
+    Spain:'🇪🇸', USA:'🇺🇸', UAE:'🇦🇪', 'Saudi Arabia':'🇸🇦', Qatar:'🇶🇦', Oman:'🇴🇲'};
+  const flag = flagMap[country] || '🌍';
+  document.getElementById('summaryStrip').innerHTML =
+    `<div class="s-pill">${flag} <strong>Destination:</strong> ${country}</div>` +
+    `<div class="s-pill">🛂 <strong>Nationality:</strong> ${nationality.split(' (')[0]}</div>` +
+    `<div class="s-pill">🎯 <strong>Purpose:</strong> ${purposeLabel}</div>`;
+
+  // Apply question map visibility
+  applyAllViz();
+
+  showPage(2);
+}
+
+// ─── Page 2 → Page 1 ──────────────────────────────────────────
+function goPage1() { showPage(1); }
+
+// ─── Submit ───────────────────────────────────────────────────
+function submitForm() {
+  // Validate always-required fields
+  const duration    = v('duration');
+  const criminal    = v('criminal_record');
+  const visaIss     = v('visa_issues');
+  let ok = true;
+  if (!duration)  { markErr('duration','e-duration');          ok=false; } else clearErr('duration','e-duration');
+  if (!criminal)  { markErr('criminal_record','e-criminal_record'); ok=false; } else clearErr('criminal_record','e-criminal_record');
+  if (!visaIss)   { markErr('visa_issues','e-visa_issues');    ok=false; } else clearErr('visa_issues','e-visa_issues');
+
+  // Validate visible required fields in dynamic section
+  const reqFields = [
+    ['employment',      'e-employment'],
+    ['employer_sponsor','e-employer_sponsor'],
+    ['study_offer',     'e-study_offer'],
+  ];
+  reqFields.forEach(([fid, eid]) => {
+    const wrap = document.getElementById('f-' + fid);
+    if (wrap && !wrap.classList.contains('hidden')) {
+      const badge = document.getElementById('b-' + fid);
+      if (badge && badge.classList.contains('badge-req')) {
+        if (!v(fid)) { markErr(fid, eid); ok = false; }
+        else clearErr(fid, eid);
+      }
+    }
+  });
+
+  if (!ok) return;
+
+  // Collect all fields
+  const allFields = [
+    'employment','work_experience','income','passive_income','savings',
+    'education','languages','family','marital_status','employer_sponsor',
+    'investment_amount','study_offer','qualification_recognition',
+    'passive_income_source','duration','health_insurance','criminal_record','visa_issues'
+  ];
+  allFields.forEach(fid => {
+    const wrap = document.getElementById('f-' + fid);
+    if (!wrap || wrap.classList.contains('hidden')) {
+      formData[fid] = 'Not applicable';
+    } else {
+      formData[fid] = v(fid) || 'Not specified';
+    }
+  });
+
+  showPage(3);
+  startLoading();
+  callWebhook();
+}
+
+// ─── Loading animation ─────────────────────────────────────────
+function startLoading() {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('errorState').classList.remove('show');
+  document.getElementById('resultState').classList.remove('show');
+  const steps = ['sa1','sa2','sa3','sa4'];
+  let i = 0;
+  const t = setInterval(() => {
+    if (i < steps.length) {
+      document.getElementById(steps[i]).classList.add('lit');
+      i++;
+    } else {
+      clearInterval(t);
+    }
+  }, 5000);
+}
+
+// ─── Webhook call ──────────────────────────────────────────────
+function callWebhook() {
+  const body = Object.entries(formData)
+    .map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v))
+    .join('&');
+
+  fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body: body
+  })
+  .then(r => {
+    if (!r.ok) throw new Error('Server returned ' + r.status);
+    return r.text();
+  })
+  .then(html => {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('resultBody').innerHTML = html;
+    document.getElementById('resultState').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  })
+  .catch(err => {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errMsg').textContent = 'Could not reach the assessment service (' + err.message + '). Please try again.';
+    document.getElementById('errorState').classList.add('show');
+  });
+}
+
+// ─── Retry ─────────────────────────────────────────────────────
+function retryCall() {
+  document.getElementById('errorState').classList.remove('show');
+  startLoading();
+  callWebhook();
+}
+
+// ─── Restart ───────────────────────────────────────────────────
+function restart() {
+  formData = {};
+  currentViz = {};
+  ['country','nationality','purpose','employment','work_experience','income','passive_income',
+   'savings','education','family','marital_status','employer_sponsor','investment_amount',
+   'study_offer','qualification_recognition','passive_income_source','duration',
+   'health_insurance','criminal_record','visa_issues'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && el.tagName === 'SELECT') el.selectedIndex = 0;
+    else if (el) el.value = '';
+  });
+  document.getElementById('resultBody').innerHTML = '';
+  showPage(1);
+}
+
+// ─── Helpers ───────────────────────────────────────────────────
+function v(id)    { const el=document.getElementById(id); return el?el.value:''; }
+function selText(id) { const el=document.getElementById(id); return el?el.options[el.selectedIndex].text:''; }
+function markErr(fid,eid) {
+  const f=document.getElementById(fid); if(f) f.classList.add('invalid');
+  const e=document.getElementById(eid); if(e) e.classList.add('show');
+}
+function clearErr(fid,eid) {
+  const f=document.getElementById(fid); if(f) f.classList.remove('invalid');
+  const e=document.getElementById(eid); if(e) e.classList.remove('show');
+}
+function showPage(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('page'+i).classList.toggle('active', i===n);
+    const ps=document.getElementById('ps'+i);
+    if(ps){ps.classList.toggle('active',i===n);ps.classList.toggle('done',i<n);}
+  });
+  // Progress fill: page1=0%, page2=50%, page3=100%
+  const fills={1:'0%',2:'50%',3:'100%'};
+  document.getElementById('progFill').style.width = fills[n] || '0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
+</body>
+</html>function exportReport(){
+  const oldTitle = document.title;
+  const country = (formData.country || 'assessment').toString().replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'');
+  document.title = `RemotePass-Immigration-Report-${country || 'assessment'}`;
+  window.print();
+  setTimeout(() => { document.title = oldTitle; }, 500);
+}
+
+
