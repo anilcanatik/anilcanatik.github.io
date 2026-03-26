@@ -37,7 +37,7 @@ body{
 
 /* Brand bar */
 .brand-wrap{
-  width:100%;max-width:1120px;display:flex;justify-content:center;margin-bottom:22px
+  width:100%;max-width:1280px;display:flex;justify-content:center;margin-bottom:22px
 }
 .brand-bar{
   width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;
@@ -65,7 +65,7 @@ body{
 
 /* Hero */
 .hero{
-  width:100%;max-width:1120px;display:block;
+  width:100%;max-width:1280px;display:block;
   margin-bottom:18px
 }
 .hero-main{
@@ -95,7 +95,7 @@ body{
 
 /* Card */
 .card{
-  width:100%;max-width:1120px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  width:100%;max-width:1280px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
   border-radius:24px;overflow:hidden;box-shadow:var(--shadow-xl);border:1px solid rgba(17,24,39,.06)
 }
 
@@ -170,10 +170,10 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 .callout strong{color:#1a4ae0;font-weight:800}
 
 .nav-row{display:flex;gap:12px;margin-top:34px;align-items:center}
-.btn-back,.btn-retry,.btn-restart{
+.btn-back,.btn-retry,.btn-restart,.btn-export{
   background:#fff;color:#334155;border:1.5px solid #d9e4f2;padding:13px 22px;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s
 }
-.btn-back:hover,.btn-retry:hover,.btn-restart:hover{border-color:#b8cae5;background:#f8fbff}
+.btn-back:hover,.btn-retry:hover,.btn-restart:hover,.btn-export:hover{border-color:#b8cae5;background:#f8fbff}
 .btn-primary{
   flex:1;background:linear-gradient(135deg,var(--rp-blue) 0%,#0b34d9 100%);color:#fff;border:none;
   padding:15px 28px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .12s,box-shadow .2s,opacity .2s;
@@ -184,7 +184,7 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 
 .disc{font-size:12px;color:#7a869f;text-align:center;margin-top:16px;line-height:1.7}
 
-.results-wrap{padding:42px}
+.results-wrap{padding:38px 34px}
 .loading-state{text-align:center;padding:50px 0}
 .spin-ring{
   width:56px;height:56px;border:4px solid #edf2ff;border-top-color:var(--rp-blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px
@@ -205,7 +205,7 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 
 .result-state{display:none}
 .result-state.show{display:block}
-.result-body{line-height:1.75}
+.result-body{line-height:1.75;overflow-x:visible}
 .result-body h2,.result-body h3{color:var(--rp-navy);font-weight:600;margin:22px 0 10px}
 .result-body h2{font-size:21px}
 .result-body h3{font-size:17px}
@@ -213,22 +213,33 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 .result-body ul{margin:0 0 12px 20px}
 .result-body li{color:#2f3f5f;font-size:14px;margin-bottom:5px}
 .result-body table{
-  width:100%;border-collapse:separate;border-spacing:0;margin:16px 0;font-size:14px;border:1px solid var(--rp-line);border-radius:16px;overflow:hidden
+  width:100%;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border-collapse:separate;border-spacing:0;margin:18px 0;font-size:14px;border:1px solid var(--rp-line);border-radius:16px;overflow:hidden;
+  min-width:1080px;background:#fff
 }
-.result-body th{background:var(--rp-navy);color:#f8fbff;padding:12px 14px;text-align:left;font-size:13px;font-weight:700}
-.result-body td{padding:11px 14px;border-bottom:1px solid #eef2f8;color:#334155;background:#fff}
+.result-body th{background:var(--rp-navy);color:#f8fbff;padding:14px 16px;text-align:left;font-size:13px;font-weight:700;vertical-align:top}
+.result-body td{padding:14px 16px;border-bottom:1px solid #eef2f8;color:#334155;background:#fff;vertical-align:top}
 .result-body tr:last-child td{border-bottom:none}
 .result-body tr:nth-child(even) td{background:#f9fbff}
+.result-body th:nth-child(1),.result-body td:nth-child(1){min-width:170px}
+.result-body th:nth-child(2),.result-body td:nth-child(2){min-width:110px}
+.result-body th:nth-child(3),.result-body td:nth-child(3){min-width:250px}
+.result-body th:nth-child(4),.result-body td:nth-child(4){min-width:320px}
+.result-body th:nth-child(5),.result-body td:nth-child(5){min-width:170px}
 .result-body .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
 .result-body .green{background:#dcfce7;color:#166534}
-.result-body .yellow{background:#fef3c7;color:#854d0e}
+.result-body .yellow{background:#fef3c7;color:#92400e}
 .result-body .red{background:#fee2e2;color:#991b1b}
 
+.result-topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px}
 .restart-row{margin-top:34px;text-align:center;padding-top:26px;border-top:1px solid var(--rp-line)}
+.action-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-export{background:var(--rp-navy);color:#fff;border:1.5px solid var(--rp-navy)}
+.btn-export:hover{background:#0c1d56;border-color:#0c1d56}
 
 /* Footer */
 .footer{
-  width:100%;max-width:1120px;color:#5f6d89;font-size:12px;margin-top:20px;text-align:center;line-height:1.8;
+  width:100%;max-width:1280px;color:#5f6d89;font-size:12px;margin-top:20px;text-align:center;line-height:1.8;
   padding:18px 16px 0
 }
 .footer a{color:#2144b7;text-decoration:none;font-weight:700}
@@ -248,6 +259,22 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
   .btn-back,.btn-primary{width:100%}
   .hero-main{padding:24px 22px}
   .hero-stats{grid-template-columns:1fr}
+  .result-body table{min-width:820px;font-size:13px}
+  .result-body th,.result-body td{padding:12px 12px}
+  .action-row{flex-direction:column}
+  .btn-export,.btn-restart{width:100%}
+}
+
+@media print{
+  body{background:#fff}
+  .hero,.progress-shell,.footer,.restart-row,#loadingState,#errorState{display:none!important}
+  .shell,.card,.result-state,.results-wrap,.result-body{box-shadow:none!important;background:#fff!important;border:none!important;max-width:none!important;padding:0!important;margin:0!important}
+  #page1,#page2{display:none!important}
+  #page3{display:block!important}
+  .page{display:none!important}
+  #page3.page{display:block!important}
+  .result-body *{color:#000!important}
+  .result-body a{text-decoration:underline!important;color:#000!important}
 }
 </style>
 
@@ -271,7 +298,7 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
           </span>
         </a>
       </div>
-      <div class="brand-chip">RemotePass Internal Tool</div>
+      <div class="brand-chip">Internal Use Only</div>
     </div>
   </div>
   <!-- Hero -->
@@ -750,8 +777,11 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 
         <!-- Result -->
         <div class="result-state" id="resultState">
+          <div class="result-topbar">
+            <button class="btn-export" onclick="exportReport()">Export report</button>
+          </div>
           <div class="result-body" id="resultBody"></div>
-          <div class="restart-row">
+          <div class="restart-row action-row">
             <button class="btn-restart" onclick="restart()">← Start a New Assessment</button>
           </div>
         </div>
@@ -763,7 +793,7 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 
   
   <div class="footer">
-    Powered by RemotePass · Not legal advice, estimates provided might change. Always consult a licensed immigration advisor for case-specific guidance. (26031)
+    Powered by RemotePass · Not legal advice, estimates provided might change. Always consult a licensed immigration advisor for case-specific guidance. (26034)
   </div>
 
 </div><!-- /shell -->
@@ -778,7 +808,7 @@ select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px 
 //    Access-Control-Allow-Methods →  POST, OPTIONS
 //    Access-Control-Allow-Headers →  Content-Type
 // ══════════════════════════════════════════════════════════════
-const WEBHOOK_URL = 'https://n8n.srv1474210.hstgr.cloud/webhook-test/remotepass-immigration-assessment';
+const WEBHOOK_URL = 'https://n8n.srv1474210.hstgr.cloud/webhook/remotepass-immigration-assessment';
 
 // ──────────────────────────────────────────────────────────────
 //  QUESTION MAP — extracted from Immigration_Visa_Database.xlsx
@@ -1135,6 +1165,18 @@ function restart() {
   showPage(1);
 }
 
+
+function exportReport(){
+  const oldTitle = document.title;
+  const country = ((window.formData && formData.country) || 'assessment')
+    .toString()
+    .replace(/[^a-z0-9]+/gi,'-')
+    .replace(/^-+|-+$/g,'');
+  document.title = `RemotePass-Immigration-Report-${country || 'assessment'}`;
+  window.print();
+  setTimeout(() => { document.title = oldTitle; }, 500);
+}
+
 // ─── Helpers ───────────────────────────────────────────────────
 function v(id)    { const el=document.getElementById(id); return el?el.value:''; }
 function selText(id) { const el=document.getElementById(id); return el?el.options[el.selectedIndex].text:''; }
@@ -1160,3 +1202,4 @@ function showPage(n) {
 </script>
 </body>
 </html>
+
