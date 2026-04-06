@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RemotePass Immigration Eligibility Estimator</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rp-blue:#1f57ff;
+  --rp-blue-2:#3b82f6;
+  --rp-navy:#07133d;
+  --rp-ink:#12203f;
+  --rp-muted:#64748b;
+  --rp-line:#e6ecf5;
+  --rp-surface:#ffffff;
+  --rp-surface-soft:#f7faff;
+  --rp-success:#16a34a;
+  --rp-warn:#f59e0b;
+  --rp-danger:#ef4444;
+  --shadow-xl:0 18px 48px rgba(9,23,63,.10);
+  --shadow-md:0 8px 24px rgba(9,23,63,.07);
+}
+body{
+  font-family:'Segoe UI',Roboto,Arial,sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(31,87,255,.12), transparent 34%),
+    radial-gradient(circle at top right, rgba(59,130,246,.10), transparent 28%),
+    linear-gradient(180deg,#f6f9ff 0%,#eef4ff 100%);
+  min-height:100vh;color:var(--rp-ink)
+}
+.shell{
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  padding:28px 16px 40px
+}
+
+/* Brand bar */
+.brand-wrap{
+  width:100%;max-width:1280px;display:flex;justify-content:center;margin-bottom:22px
+}
+.brand-bar{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:rgba(255,255,255,.78);backdrop-filter:blur(12px);
+  border:1px solid rgba(17,24,39,.06); border-radius:18px;
+  padding:14px 18px; box-shadow:var(--shadow-md)
+}
+.brand-left{display:flex;align-items:center;gap:12px}
+.brand-logo{
+  display:flex;align-items:center;gap:12px;font-weight:600;color:var(--rp-navy);text-decoration:none
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:12px;
+  background:linear-gradient(135deg,var(--rp-blue),#0b34d9);
+  display:grid;place-items:center;box-shadow:0 10px 20px rgba(31,87,255,.2)
+}
+.brand-mark svg{width:20px;height:20px;display:block}
+.brand-name{font-size:20px;letter-spacing:-.03em}
+.brand-note{font-size:12px;color:var(--rp-muted)}
+.brand-chip{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#eef4ff;border:1px solid #dbe7ff;color:#2144b7;
+  padding:8px 12px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap
+}
+
+/* Hero */
+.hero{
+  width:100%;max-width:1280px;display:block;
+  margin-bottom:18px
+}
+.hero-main{
+  background:linear-gradient(180deg,rgba(255,255,255,.96),rgba(255,255,255,.92));
+  border:1px solid rgba(17,24,39,.06); border-radius:24px; box-shadow:var(--shadow-md);
+  padding:26px 30px
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:#eef4ff;border:1px solid #dbe7ff;color:#2144b7;
+  font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  padding:7px 14px;border-radius:999px;margin-bottom:16px
+}
+.hero h1{
+  font-size:clamp(28px,4vw,40px);font-weight:600;color:var(--rp-navy);
+  letter-spacing:-.02em;line-height:1.15;margin-bottom:12px
+}
+.hero h1 span{color:var(--rp-blue)}
+.hero p{
+  color:#44516d;font-size:16px;line-height:1.65;max-width:760px;margin-bottom:18px
+}
+.hero-points{display:flex;flex-wrap:wrap;gap:10px}
+.hero-pill{
+  background:#fff;border:1px solid var(--rp-line);border-radius:999px;
+  padding:10px 14px;font-size:13px;font-weight:500;color:#233458
+}
+
+/* Card */
+.card{
+  width:100%;max-width:1280px;background:rgba(255,255,255,.94);backdrop-filter:blur(8px);
+  border-radius:24px;overflow:hidden;box-shadow:var(--shadow-xl);border:1px solid rgba(17,24,39,.06)
+}
+
+/* Progress */
+.prog-bar{background:#fbfdff;padding:24px 34px;border-bottom:1px solid var(--rp-line)}
+.prog-steps{display:flex;align-items:flex-start;gap:0;position:relative}
+.prog-track{position:absolute;top:18px;left:20px;right:20px;height:3px;background:#e5edf8;z-index:0;border-radius:999px}
+.prog-fill{height:3px;background:linear-gradient(90deg,var(--rp-blue),#7aa5ff);transition:width .45s ease;width:0;border-radius:999px}
+.p-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.p-dot{
+  width:40px;height:40px;border-radius:50%;border:2px solid #d8e2f2;background:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:600;color:#7a8aa8;transition:all .35s;box-shadow:0 0 0 0 rgba(31,87,255,0)
+}
+.p-step.done .p-dot{background:var(--rp-blue);border-color:var(--rp-blue);color:#fff}
+.p-step.active .p-dot{background:var(--rp-blue);border-color:var(--rp-blue);color:#fff;box-shadow:0 0 0 7px rgba(31,87,255,.12)}
+.p-lbl{font-size:11px;font-weight:600;color:#7a8aa8;margin-top:8px;text-transform:uppercase;letter-spacing:.08em;text-align:center}
+.p-step.active .p-lbl,.p-step.done .p-lbl{color:#2144b7}
+
+/* Pages */
+.page{display:none;animation:fadeIn .35s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+.form-inner{padding:38px 42px 42px}
+.pg-head{margin-bottom:28px}
+.pg-eyebrow{font-size:12px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:#2f58d6;margin-bottom:8px}
+.pg-title{font-size:29px;font-weight:600;color:var(--rp-navy);letter-spacing:-.035em;line-height:1.15;margin-bottom:8px}
+.pg-sub{font-size:15px;color:#5e6d89;line-height:1.7;max-width:720px}
+
+.q-group{margin-bottom:12px}
+.q-group-label{
+  display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#5f6d89;
+  margin:28px 0 14px;padding-bottom:10px;border-bottom:1px solid var(--rp-line)
+}
+.q-group-label span{font-size:15px}
+.field{margin-bottom:18px;transition:opacity .3s,height .3s;overflow:hidden}
+.field.hidden{display:none}
+.field-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px}
+label{font-size:14px;font-weight:500;color:#1f2d4d;line-height:1.45;cursor:pointer}
+.badge-req,.badge-opt{
+  font-size:10px;font-weight:600;padding:4px 8px;border-radius:999px;white-space:nowrap;flex-shrink:0;margin-top:1px;border:1px solid transparent
+}
+.badge-req{background:#eef4ff;color:#2144b7;border-color:#d7e5ff}
+.badge-opt{background:#f8fafc;color:#64748b;border-color:#e5edf5}
+
+select,input[type=text]{
+  width:100%;padding:13px 44px 13px 15px;
+  border:1.5px solid #dbe5f1;border-radius:14px;font-size:14px;color:#1e293b;background:#fff;
+  transition:border-color .2s,box-shadow .2s,transform .1s;
+  appearance:none;-webkit-appearance:none;
+  box-shadow:0 1px 0 rgba(16,24,40,.02);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2364758b' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 14px center
+}
+input[type=text]{background-image:none;padding-right:14px}
+select:hover,input[type=text]:hover{border-color:#c7d6ea}
+select:focus,input:focus{outline:none;border-color:var(--rp-blue);box-shadow:0 0 0 4px rgba(31,87,255,.10)}
+select.invalid,input.invalid{border-color:var(--rp-danger);box-shadow:0 0 0 4px rgba(239,68,68,.10)}
+.hint{font-size:12px;color:#7a869f;margin-top:6px;line-height:1.5;padding-left:2px}
+.err{font-size:12px;color:var(--rp-danger);margin-top:6px;display:none}
+.err.show{display:block}
+
+.summary-strip{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:26px}
+.s-pill{
+  background:#f7faff;border:1px solid #e2ebfb;border-radius:999px;padding:8px 14px;font-size:13px;color:#324562;display:flex;align-items:center;gap:6px
+}
+.s-pill strong{color:var(--rp-navy);font-weight:800}
+
+.callout{
+  background:#f5f9ff;border:1px solid #dbe8ff;border-radius:16px;padding:15px 16px;margin-bottom:16px;font-size:13px;color:#25406f;line-height:1.6
+}
+.callout strong{color:#1a4ae0;font-weight:800}
+
+.nav-row{display:flex;gap:12px;margin-top:34px;align-items:center}
+.btn-back,.btn-retry,.btn-restart,.btn-export{
+  background:#fff;color:#334155;border:1.5px solid #d9e4f2;padding:13px 22px;border-radius:14px;font-size:15px;font-weight:500;cursor:pointer;transition:all .2s
+}
+.btn-back:hover,.btn-retry:hover,.btn-restart:hover,.btn-export:hover{border-color:#b8cae5;background:#f8fbff}
+.btn-primary{
+  flex:1;background:linear-gradient(135deg,var(--rp-blue) 0%,#0b34d9 100%);color:#fff;border:none;
+  padding:15px 28px;border-radius:14px;font-size:16px;font-weight:600;cursor:pointer;transition:transform .12s,box-shadow .2s,opacity .2s;
+  letter-spacing:.01em;box-shadow:0 14px 30px rgba(31,87,255,.24)
+}
+.btn-primary:hover{opacity:.98;box-shadow:0 16px 34px rgba(31,87,255,.30)}
+.btn-primary:active{transform:translateY(1px)}
+
+.disc{font-size:12px;color:#7a869f;text-align:center;margin-top:16px;line-height:1.7}
+
+.results-wrap{padding:38px 34px}
+.loading-state{text-align:center;padding:50px 0}
+.spin-ring{
+  width:56px;height:56px;border:4px solid #edf2ff;border-top-color:var(--rp-blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-title{font-size:20px;font-weight:600;color:var(--rp-navy);margin-bottom:8px;letter-spacing:-.02em}
+.loading-sub{font-size:13px;color:#7a869f}
+.steps-anim{display:flex;flex-direction:column;gap:9px;margin:24px auto 0;max-width:320px;text-align:left}
+.step-anim{display:flex;align-items:center;gap:10px;font-size:13px;color:#71819d;opacity:.45;transition:opacity .4s}
+.step-anim.lit{opacity:1;color:#2144b7;font-weight:700}
+.step-anim .dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+.error-state{display:none;text-align:center;padding:46px 0}
+.error-state.show{display:block}
+.err-ico{font-size:52px;margin-bottom:16px}
+.err-title{font-size:22px;font-weight:600;color:var(--rp-navy);margin-bottom:8px}
+.err-msg{font-size:14px;color:#5f6d89;line-height:1.7;margin-bottom:24px}
+
+.result-state{display:none}
+.result-state.show{display:block}
+.result-body{line-height:1.75;overflow-x:visible}
+.result-body h2,.result-body h3{color:var(--rp-navy);font-weight:600;margin:22px 0 10px}
+.result-body h2{font-size:21px}
+.result-body h3{font-size:17px}
+.result-body p{color:#2f3f5f;font-size:14px;margin-bottom:12px}
+.result-body ul{margin:0 0 12px 20px}
+.result-body li{color:#2f3f5f;font-size:14px;margin-bottom:5px}
+.result-body table{
+  width:100%;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  border-collapse:separate;border-spacing:0;margin:18px 0;font-size:14px;border:1px solid var(--rp-line);border-radius:16px;overflow:hidden;
+  min-width:1080px;background:#fff
+}
+.result-body th{background:var(--rp-navy);color:#f8fbff;padding:14px 16px;text-align:left;font-size:13px;font-weight:700;vertical-align:top}
+.result-body td{padding:14px 16px;border-bottom:1px solid #eef2f8;color:#334155;background:#fff;vertical-align:top}
+.result-body tr:last-child td{border-bottom:none}
+.result-body tr:nth-child(even) td{background:#f9fbff}
+.result-body th:nth-child(1),.result-body td:nth-child(1){min-width:170px}
+.result-body th:nth-child(2),.result-body td:nth-child(2){min-width:110px}
+.result-body th:nth-child(3),.result-body td:nth-child(3){min-width:250px}
+.result-body th:nth-child(4),.result-body td:nth-child(4){min-width:320px}
+.result-body th:nth-child(5),.result-body td:nth-child(5){min-width:170px}
+.result-body .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:800}
+.result-body .green{background:#dcfce7;color:#166534}
+.result-body .yellow{background:#fef3c7;color:#92400e}
+.result-body .red{background:#fee2e2;color:#991b1b}
+
+.result-topbar{display:flex;justify-content:flex-end;align-items:center;margin-bottom:16px}
+.restart-row{margin-top:34px;text-align:center;padding-top:26px;border-top:1px solid var(--rp-line)}
+.action-row{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.btn-export{background:var(--rp-navy);color:#fff;border:1.5px solid var(--rp-navy)}
+.btn-export:hover{background:#0c1d56;border-color:#0c1d56}
+
+/* Footer */
+.footer{
+  width:100%;max-width:1280px;color:#5f6d89;font-size:12px;margin-top:20px;text-align:center;line-height:1.8;
+  padding:18px 16px 0
+}
+.footer a{color:#2144b7;text-decoration:none;font-weight:700}
+.footer strong{color:var(--rp-navy)}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  .brand-bar{padding:14px}
+  .brand-note{display:none}
+  .brand-chip{display:none}
+  .hero-main{border-radius:22px}
+  .form-inner,.results-wrap{padding:24px 20px 28px}
+  .prog-bar{padding:18px 20px}
+  .nav-row{flex-direction:column}
+  .btn-back,.btn-primary{width:100%}
+  .hero-main{padding:24px 22px}
+  .hero-stats{grid-template-columns:1fr}
+  .result-body table{min-width:820px;font-size:13px}
+  .result-body th,.result-body td{padding:12px 12px}
+  .action-row{flex-direction:column}
+  .btn-export,.btn-restart{width:100%}
+}
+
+@media print{
+  @page{size:A4 landscape;margin:1.5cm}
+
+  /* ── Flatten page chrome ────────────────────────────────── */
+  body{background:#fff!important;min-height:0!important}
+  .shell{padding:0!important;min-height:0!important;display:block!important}
+
+  /* ── Hide everything that is not the result content ─────── */
+  .brand-wrap,.hero,.prog-bar,.footer,
+  .restart-row,.result-topbar,
+  #loadingState,#errorState{display:none!important}
+
+  /* ── Strip card/container chrome ───────────────────────── */
+  .card{
+    box-shadow:none!important;border:none!important;
+    border-radius:0!important;max-width:none!important;
+    overflow:visible!important;background:#fff!important
+  }
+  .results-wrap{padding:0!important;margin:0!important;background:#fff!important}
+
+  /* ── Page visibility ────────────────────────────────────── */
+  .page{display:none!important}
+  #page3,#page3.page{display:block!important}
+
+  /* ── Result state ───────────────────────────────────────── */
+  /* result-state starts as display:none; JS adds .show → display:block.
+     Explicitly re-enforce both so print captures it correctly. */
+  .result-state{display:none!important}
+  .result-state.show{display:block!important;padding:0!important;margin:0!important}
+  .result-body{padding:0!important;margin:0!important}
+
+  /* ── Text colours ───────────────────────────────────────── */
+  .result-body *{color:#000!important}
+  .result-body a{text-decoration:underline!important;color:#1155cc!important}
+
+  /* ── Table: convert from scrollable block → proper print table ── */
+  .result-body table{
+    display:table!important;
+    overflow:visible!important;
+    min-width:0!important;
+    width:100%!important;
+    font-size:11px!important;
+    border-radius:0!important;   /* remove clip that caused blank areas */
+    border:1px solid #ccc!important;
+    table-layout:fixed!important;
+    page-break-inside:auto
+  }
+  .result-body thead{display:table-header-group}  /* repeat header on each page */
+  .result-body tr{page-break-inside:avoid}
+  .result-body th,.result-body td{
+    min-width:0!important;
+    padding:7px 9px!important;
+    overflow-wrap:break-word;
+    word-break:break-word;
+    border:1px solid #ddd!important
+  }
+  .result-body th{background:#07133d!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .result-body tr:nth-child(even) td{background:#f5f8ff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .result-body .badge{border:1px solid #999!important}
+}
+
+/* ── Config loading overlay ──────────────────────────────── */
+#cfgOverlay{
+  position:fixed;inset:0;background:rgba(7,19,61,.55);backdrop-filter:blur(6px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:9999;gap:18px
+}
+#cfgOverlay .spin-ring{width:48px;height:48px;border:4px solid rgba(255,255,255,.25);
+  border-top-color:#fff;border-radius:50%;animation:spin 0.8s linear infinite}
+#cfgOverlay p{color:#fff;font-size:15px;opacity:.9}
+#cfgError{display:none;text-align:center;padding:24px;color:var(--rp-danger);font-size:14px}
+
+/* ── Dynamic checkbox group ─────────────────────────────── */
+.checkbox-group{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.cb-item{display:flex;align-items:center;gap:10px;font-size:14px;cursor:pointer;
+  padding:10px 14px;border:1px solid var(--rp-line);border-radius:10px;
+  transition:background .15s,border-color .15s}
+.cb-item:hover{background:var(--rp-surface-soft);border-color:#c7d7ff}
+.cb-item input[type=checkbox]{width:17px;height:17px;accent-color:var(--rp-blue);
+  flex-shrink:0;cursor:pointer}
+
+/* ── Hint text under field ──────────────────────────────── */
+.hint{font-size:12px;color:var(--rp-muted);margin-top:4px}
+
+</style>
+
+</head>
+<body>
+
+<div class="shell">
+<!-- Config loading overlay -->
+<div id="cfgOverlay">
+  <div class="spin-ring"></div>
+  <p>Loading form configuration…</p>
+</div>
+<div id="cfgError">
+  ⚠️ Could not load form configuration from Google Sheets.<br>
+  Please check your internet connection and refresh the page.
+</div>
+
+
+  <div class="brand-wrap">
+    <div class="brand-bar">
+      <div class="brand-left">
+        <a class="brand-logo" href="https://www.remotepass.com/" target="_blank" rel="noopener noreferrer" aria-label="RemotePass">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 3.5a6.75 6.75 0 0 0-4.85 11.45l1.38 1.42-1.03 1.04-1.42-1.46A8.75 8.75 0 1 1 20.75 10c0 2.35-.92 4.55-2.6 6.2L12 22.35l-5.06-5.18 1.43-1.4L12 19.46l4.72-4.8A6.75 6.75 0 0 0 12 3.5Zm0 3.35a3.4 3.4 0 0 1 2.41 5.8L12 15.1l-2.41-2.45A3.4 3.4 0 0 1 12 6.85Z" fill="white"/>
+            </svg>
+          </span>
+          <span>
+            <span class="brand-name">RemotePass</span><br>
+            <span class="brand-note">Global mobility, payroll and relocation</span>
+          </span>
+        </a>
+      </div>
+      <div class="brand-chip">Internal Use Only</div>
+    </div>
+  </div>
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-badge">RemotePass · Internal tool</div>
+      <h1>Immigration eligibility,<br><span>presented the RemotePass way</span></h1>
+      <p>Help candidates and team members understand likely visa pathways, eligibility signals, and expected timelines through a cleaner, more premium RemotePass-branded experience.</p>
+      <div class="hero-points">
+      </div>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+
+    <!-- Progress -->
+    <div class="prog-bar">
+      <div class="prog-steps">
+        <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+        <div class="p-step active" id="ps1">
+          <div class="p-dot">1</div>
+          <div class="p-lbl">Destination</div>
+        </div>
+        <div class="p-step" id="ps2">
+          <div class="p-dot">2</div>
+          <div class="p-lbl">Your Profile</div>
+        </div>
+        <div class="p-step" id="ps3">
+          <div class="p-dot">3</div>
+          <div class="p-lbl">Results</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════════════ PAGE 1 — DESTINATION ══════════════════ -->
+    <div class="page active" id="page1">
+      <div class="form-inner">
+        <div class="pg-head">
+          <div class="pg-eyebrow">Step 1 of 2</div>
+          <div class="pg-title">Where are you planning to move?</div>
+          <div class="pg-sub">We'll personalise the next questions based on your destination and purpose.</div>
+        </div>
+
+        <!-- Q01: Country -->
+        <div class="field" id="f-country">
+          <div class="field-head">
+            <label for="country">🌍 Destination country</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="country" onchange="onCountryPurposeChange()">
+            <option value="" disabled selected>Select a country…</option>
+            <option value="Switzerland">🇨🇭  Switzerland</option>
+            <option value="United Kingdom">🇬🇧  United Kingdom</option>
+            <option value="Germany">🇩🇪  Germany</option>
+            <option value="Portugal">🇵🇹  Portugal</option>
+            <option value="Spain">🇪🇸  Spain</option>
+            <option value="USA">🇺🇸  USA</option>
+            <option value="UAE">🇦🇪  UAE</option>
+            <option value="Saudi Arabia">🇸🇦  Saudi Arabia</option>
+            <option value="Qatar">🇶🇦  Qatar</option>
+            <option value="Oman">🇴🇲  Oman</option>
+          </select>
+          <div class="err" id="e-country">Please select a destination country.</div>
+        </div>
+
+        <!-- Q02: Nationality -->
+        <div class="field" id="f-nationality">
+          <div class="field-head">
+            <label for="nationality">🛂 Your current nationality</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="nationality">
+            <option value="" disabled selected>Select your nationality…</option>
+            <option value="EU / EEA national">🇪🇺  EU / EEA national</option>
+            <option value="Swiss national">🇨🇭  Swiss national</option>
+            <option value="UK national">🇬🇧  UK national</option>
+            <option value="US or Canadian national">🇺🇸  US or Canadian national</option>
+            <option value="Australian or New Zealand national">🇦🇺  Australian or New Zealand national</option>
+            <option value="GCC national">🌙  GCC national (UAE, KSA, Qatar, Kuwait, Bahrain, Oman)</option>
+            <option value="Indian national">🇮🇳  Indian national</option>
+            <option value="Chinese national">🇨🇳  Chinese national</option>
+            <option value="Turkish national">🇹🇷  Turkish national</option>
+            <option value="Other">🌐  Other nationality</option>
+          </select>
+          <div class="err" id="e-nationality">Please select your nationality.</div>
+        </div>
+
+        <!-- Q03: Purpose -->
+        <div class="field" id="f-purpose">
+          <div class="field-head">
+            <label for="purpose">🎯 Main reason for moving</label>
+            <span class="badge-req">Required</span>
+          </div>
+          <select id="purpose" onchange="onCountryPurposeChange()">
+            <option value="" disabled selected>Select your purpose…</option>
+            <option value="work_employed">💼  Work for an employer</option>
+            <option value="self_employed">🧑‍💻  Self-employment or freelancing</option>
+            <option value="business">🏢  Start or run a business</option>
+            <option value="study">🎓  Study at a university or college</option>
+            <option value="retire">🌴  Retire or live on passive income</option>
+            <option value="digital_nomad">💻  Work remotely (digital nomad)</option>
+            <option value="join_family">👨‍👩‍👧  Join a family member already there</option>
+            <option value="investment">📈  Make an investment</option>
+          </select>
+          <div class="err" id="e-purpose">Please select your main purpose.</div>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn-primary" onclick="goPage2()">Continue  →</button>
+        </div>
+      </div>
+    </div><!-- /page1 -->
+
+
+    <!-- ════════════════ PAGE 2 — PROFILE ════════════════════════ -->
+    <div class="page" id="page2">
+      <div class="form-inner">
+        <div class="pg-head">
+          <div class="pg-eyebrow">Step 2 of 2</div>
+          <div class="pg-title">Tell us about your profile</div>
+          <div class="pg-sub">Only questions relevant to your destination and purpose are shown.</div>
+        </div>
+
+        <!-- Page 1 summary pills -->
+        <div class="summary-strip" id="summaryStrip"></div>
+
+        <div id="dynamicQuestions"></div>
+
+        <div class="nav-row">
+          <button class="btn-back" onclick="goPage1()">← Back</button>
+          <button class="btn-primary" onclick="submitForm()">Get My Assessment →</button>
+        </div>
+        <p class="disc">Your answers are processed securely and not stored. This estimate is for guidance only and does not replace formal immigration advice.</p>
+      </div>
+    </div><!-- /page2 -->
+
+
+    <!-- ════════════════ PAGE 3 — RESULTS ════════════════════════ -->
+    <div class="page" id="page3">
+      <div class="results-wrap">
+
+        <!-- Loading -->
+        <div class="loading-state" id="loadingState">
+          <div class="spin-ring"></div>
+          <div class="loading-title">Preparing your RemotePass assessment…</div>
+          <div class="loading-sub">This usually takes 15–30 seconds</div>
+          <div class="steps-anim" id="stepsAnim">
+            <div class="step-anim lit" id="sa1"><div class="dot"></div>Matching likely visa pathways</div>
+            <div class="step-anim" id="sa2"><div class="dot"></div>Reviewing key eligibility criteria</div>
+            <div class="step-anim" id="sa3"><div class="dot"></div>Estimating timelines and effort</div>
+            <div class="step-anim" id="sa4"><div class="dot"></div>Formatting your personalised report</div>
+          </div>
+        </div>
+
+        <!-- Error -->
+        <div class="error-state" id="errorState">
+          <div class="err-ico">⚠️</div>
+          <div class="err-title">Something went wrong</div>
+          <p class="err-msg" id="errMsg">We couldn't reach the assessment service. Please check your connection and try again.</p>
+          <button class="btn-retry" onclick="retryCall()">Try Again</button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-state" id="resultState">
+          <div class="result-topbar">
+            <button class="btn-export" onclick="exportReport()">Export report</button>
+          </div>
+          <div class="result-body" id="resultBody"></div>
+          <div class="restart-row action-row">
+            <button class="btn-restart" onclick="restart()">← Start a New Assessment</button>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /page3 -->
+
+  </div><!-- /card -->
+
+  
+  <div class="footer">
+    Powered by RemotePass · Not legal advice, estimates provided might change. Always consult a licensed immigration advisor for case-specific guidance. (26035) &nbsp;<span id="lastUpdateSpan"></span>
+  </div>
+
+</div><!-- /shell -->
+
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════════
+//  RemotePass Immigration Estimator — Dynamic Config Edition
+//  Config is loaded from Google Sheets CSV (cached 6 h in localStorage).
+//  Update the 5 Form_* sheets in the linked spreadsheet to control the form.
+// ══════════════════════════════════════════════════════════════════════════════
+
+// ── Constants ──────────────────────────────────────────────────────────────
+const WEBHOOK_URL = 'https://n8n.srv1474210.hstgr.cloud/webhook/remotepass-immigration-assessment';
+const SHEET_ID    = '1ZMfVESmUIwpTqLat6pK349Gljd4y3j_o';
+const CACHE_KEY   = 'rp_form_cfg_v1';
+const CACHE_TTL   = 6 * 60 * 60 * 1000; // 6 hours in ms
+
+// ── State ─────────────────────────────────────────────────────────────────
+let CONFIG   = null;
+let formData = {};
+
+// ── CSV Utilities ─────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  if (!lines.length) return [];
+  const headers = splitCSVRow(lines[0]);
+  return lines.slice(1).filter(l => l.trim()).map(line => {
+    const vals = splitCSVRow(line);
+    const obj  = {};
+    headers.forEach((h, i) => { obj[h.trim()] = (vals[i] || '').trim(); });
+    return obj;
+  });
+}
+
+function splitCSVRow(row) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < row.length; i++) {
+    const ch = row[i];
+    if (ch === '"') {
+      if (inQ && row[i+1] === '"') { cur += '"'; i++; }
+      else { inQ = !inQ; }
+    } else if (ch === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += ch; }
+  }
+  result.push(cur);
+  return result;
+}
+
+function sheetCsvUrl(sheetName) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+}
+
+// ── Config Loading ────────────────────────────────────────────────────────
+async function loadFormConfig() {
+  showConfigOverlay(true);
+  document.getElementById('cfgError').style.display = 'none';
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const { ts, data } = JSON.parse(cached);
+        if (Date.now() - ts < CACHE_TTL) {
+          CONFIG = data;
+          applyConfig(ts);
+          showConfigOverlay(false);
+          scheduleSilentRefresh(ts + CACHE_TTL - Date.now());
+          return;
+        }
+      } catch(e) { /* stale cache */ }
+    }
+    await fetchAndApplyConfig();
+  } catch(e) {
+    console.error('Config load error:', e);
+    showConfigOverlay(false);
+    document.getElementById('cfgError').style.display = 'block';
+  }
+}
+
+async function fetchAndApplyConfig() {
+  const sheetNames = {
+    countries:    'Form_Countries',
+    purposes:     'Form_Purposes',
+    questions:    'Form_Questions',
+    questionMap:  'Form_QuestionMap',
+    sponsorLabels:'Form_SponsorLabels'
+  };
+  const entries = await Promise.all(
+    Object.entries(sheetNames).map(async ([key, sheet]) => {
+      const r = await fetch(sheetCsvUrl(sheet));
+      if (!r.ok) throw new Error(`Sheet "${sheet}": HTTP ${r.status}`);
+      return [key, parseCSV(await r.text())];
+    })
+  );
+  const csvData = Object.fromEntries(entries);
+  CONFIG = buildConfig(csvData);
+  const ts = Date.now();
+  localStorage.setItem(CACHE_KEY, JSON.stringify({ ts, data: CONFIG }));
+  applyConfig(ts);
+  showConfigOverlay(false);
+  scheduleSilentRefresh(CACHE_TTL);
+}
+
+function buildConfig(csvData) {
+  const cfg = {
+    countries: [...csvData.countries].sort((a,b) => +a.sort_order - +b.sort_order),
+    purposes:  [...csvData.purposes ].sort((a,b) => +a.sort_order - +b.sort_order),
+    questions: [...csvData.questions].sort((a,b) =>
+      (+a.group_order - +b.group_order) || (+a.sort_order - +b.sort_order)
+    ),
+    questionMap:   {}, // { country → { purpose → { qid → visibility } } }
+    sponsorLabels: {}  // { country → { qid → label } }
+  };
+  csvData.questionMap.forEach(row => {
+    const { country: c, purpose: p, question_id: q, visibility: vis } = row;
+    if (!cfg.questionMap[c]) cfg.questionMap[c] = {};
+    if (!cfg.questionMap[c][p]) cfg.questionMap[c][p] = {};
+    cfg.questionMap[c][p][q] = vis;
+  });
+  csvData.sponsorLabels.forEach(row => {
+    if (!cfg.sponsorLabels[row.country]) cfg.sponsorLabels[row.country] = {};
+    cfg.sponsorLabels[row.country][row.question_id] = row.label;
+  });
+  return cfg;
+}
+
+function applyConfig(ts) {
+  renderPage1Options();
+  updateFooterTimestamp(ts || null);
+}
+
+// ── Page 1 Options ────────────────────────────────────────────────────────
+function renderPage1Options() {
+  if (!CONFIG) return;
+  const cSel = document.getElementById('country');
+  const pSel = document.getElementById('purpose');
+  if (!cSel || !pSel) return;
+
+  const prevC = cSel.value, prevP = pSel.value;
+
+  cSel.innerHTML = '<option value="" disabled selected>Select destination country\u2026</option>';
+  CONFIG.countries.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.country_value;
+    o.textContent = `${c.flag_emoji}\u00a0\u00a0${c.country_name}`;
+    cSel.appendChild(o);
+  });
+
+  pSel.innerHTML = '<option value="" disabled selected>Select your purpose\u2026</option>';
+  CONFIG.purposes.forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.purpose_value;
+    o.textContent = `${p.purpose_icon}\u00a0\u00a0${p.purpose_label}`;
+    pSel.appendChild(o);
+  });
+
+  if (prevC) cSel.value = prevC;
+  if (prevP) pSel.value = prevP;
+}
+
+// ── Page 2 Dynamic Builder ────────────────────────────────────────────────
+function buildPage2Questions(country, purpose) {
+  const container = document.getElementById('dynamicQuestions');
+  if (!container || !CONFIG) return;
+
+  const qmap      = CONFIG.questionMap;
+  const allDef    = (qmap['All'] && qmap['All']['All']) || {};
+  const specific  = (qmap[country] && qmap[country][purpose]) || {};
+  const visibility = { ...allDef, ...specific };
+
+  // Group questions
+  const groupOrder = [];
+  const groupMap   = {};
+  CONFIG.questions.forEach(q => {
+    const vis = visibility[q.question_id];
+    if (!vis || vis === 'hidden') return;
+    if (!groupMap[q.group]) {
+      groupMap[q.group] = { name: q.group, icon: q.group_icon, order: +q.group_order, qs: [] };
+      groupOrder.push(q.group);
+    }
+    groupMap[q.group].qs.push({ ...q, vis });
+  });
+  groupOrder.sort((a,b) => groupMap[a].order - groupMap[b].order);
+
+  let html = '';
+  groupOrder.forEach(grpKey => {
+    const grp = groupMap[grpKey];
+    if (!grp.qs.length) return;
+    html += `<div class="q-group">`;
+    html += `<div class="q-group-label"><span>${grp.icon}</span> ${esc(grp.name)}</div>`;
+    grp.qs.forEach(q => {
+      const isReq  = q.vis === 'required';
+      const badge  = isReq ? 'badge-req' : 'badge-opt';
+      const bLabel = isReq ? 'Required'  : 'Optional';
+
+      // Country-specific label override
+      let label = q.label;
+      if (q.question_id === 'Q18') {
+        const ovr = CONFIG.sponsorLabels[country]?.['Q18'];
+        if (ovr) label = ovr;
+      }
+
+      html += `<div class="field" id="f-${q.question_id}">`;
+      html += `<div class="field-head"><label for="${q.question_id}">${esc(label)}</label>`;
+      html += `<span class="${badge}" id="b-${q.question_id}">${bLabel}</span></div>`;
+      if (q.hint) html += `<div class="hint">${esc(q.hint)}</div>`;
+
+      if (q.input_type === 'select') {
+        html += `<select id="${q.question_id}">`;
+        if (q.placeholder) html += `<option value="" disabled selected>${esc(q.placeholder)}</option>`;
+        for (let i = 1; i <= 10; i++) {
+          const opt = q[`option_${i}`];
+          if (opt) html += `<option value="${esc(opt)}">${esc(opt)}</option>`;
+        }
+        html += `</select>`;
+      } else if (q.input_type === 'checkbox') {
+        html += `<div class="checkbox-group" id="${q.question_id}">`;
+        for (let i = 1; i <= 10; i++) {
+          const opt = q[`option_${i}`];
+          if (opt) html += `<label class="cb-item"><input type="checkbox" name="${q.question_id}" value="${esc(opt)}"> ${esc(opt)}</label>`;
+        }
+        html += `</div>`;
+      }
+      html += `<div class="err" id="e-${q.question_id}">Please answer this question.</div>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html ||
+    '<p class="hint" style="padding:16px 0;color:var(--rp-muted)">No additional questions required for this selection.</p>';
+}
+
+function esc(s) {
+  return String(s||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Footer Timestamp ──────────────────────────────────────────────────────
+function updateFooterTimestamp(ts) {
+  const el = document.getElementById('lastUpdateSpan');
+  if (!el) return;
+  if (!ts) {
+    try { const c = JSON.parse(localStorage.getItem(CACHE_KEY)||'{}'); ts = c.ts||0; } catch(e) {}
+  }
+  if (!ts) { el.textContent = ''; return; }
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2,'0');
+  el.textContent = `· Last Update: ${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+// ── Silent Background Refresh ─────────────────────────────────────────────
+function scheduleSilentRefresh(delayMs) {
+  setTimeout(async () => {
+    try { await fetchAndApplyConfig(); } catch(e) { console.warn('Silent refresh failed:', e); }
+    scheduleSilentRefresh(CACHE_TTL);
+  }, Math.max(delayMs, 0));
+}
+
+// ── Config Overlay ────────────────────────────────────────────────────────
+function showConfigOverlay(show) {
+  const el = document.getElementById('cfgOverlay');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+// ── Page Navigation ───────────────────────────────────────────────────────
+function goPage2() {
+  const country     = v('country');
+  const nationality = v('nationality');
+  const purpose     = v('purpose');
+  let ok = true;
+  if (!country)     { markErr('country','e-country');        ok=false; } else clearErr('country','e-country');
+  if (!nationality) { markErr('nationality','e-nationality');ok=false; } else clearErr('nationality','e-nationality');
+  if (!purpose)     { markErr('purpose','e-purpose');        ok=false; } else clearErr('purpose','e-purpose');
+  if (!ok) return;
+
+  formData.country     = country;
+  formData.nationality = nationality;
+  formData.purpose     = purpose;
+
+  // Summary strip
+  const purposeLabel = selText('purpose');
+  const flag = CONFIG?.countries.find(c => c.country_value === country)?.flag_emoji || '🌍';
+  document.getElementById('summaryStrip').innerHTML =
+    `<div class="s-pill">${flag} <strong>Destination:</strong> ${country}</div>` +
+    `<div class="s-pill">🛂 <strong>Nationality:</strong> ${nationality.split(' (')[0]}</div>` +
+    `<div class="s-pill">🎯 <strong>Purpose:</strong> ${purposeLabel}</div>`;
+
+  buildPage2Questions(country, purpose);
+  showPage(2);
+}
+
+function goPage1() { showPage(1); }
+
+// ── Submit ────────────────────────────────────────────────────────────────
+function submitForm() {
+  let ok = true;
+  const dyn = document.getElementById('dynamicQuestions');
+  if (dyn) {
+    dyn.querySelectorAll('.field').forEach(wrap => {
+      const qid   = wrap.id.replace('f-','');
+      const badge = document.getElementById('b-' + qid);
+      if (badge && badge.classList.contains('badge-req')) {
+        const inp = document.getElementById(qid);
+        const val = inp ? (inp.tagName === 'SELECT' ? inp.value :
+          [...(inp.querySelectorAll ? inp.querySelectorAll('input:checked') : [])].length) : 0;
+        if (!val) { markErr(wrap.id, 'e-' + qid); ok = false; }
+        else       { clearErr(wrap.id, 'e-' + qid); }
+      }
+    });
+  }
+  if (!ok) { window.scrollTo({top:0,behavior:'smooth'}); return; }
+
+  // Collect field values
+  if (CONFIG) {
+    CONFIG.questions.forEach(q => {
+      const qid  = q.question_id;
+      const wrap = document.getElementById('f-' + qid);
+      if (!wrap) { formData[qid] = 'Not applicable'; return; }
+      const inp = document.getElementById(qid);
+      if (!inp)  { formData[qid] = 'Not applicable'; return; }
+      if (inp.tagName === 'SELECT') {
+        formData[qid] = inp.value || 'Not specified';
+      } else {
+        // checkbox group
+        const checked = [...inp.querySelectorAll('input:checked')].map(i => i.value);
+        formData[qid] = checked.length ? checked.join(', ') : 'Not specified';
+      }
+    });
+  }
+
+  showPage(3);
+  startLoading();
+  callWebhook();
+}
+
+// ── Loading Animation ─────────────────────────────────────────────────────
+function startLoading() {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('errorState').classList.remove('show');
+  document.getElementById('resultState').classList.remove('show');
+  ['sa1','sa2','sa3','sa4'].forEach((id,i) => {
+    document.getElementById(id).classList.remove('lit');
+    setTimeout(() => document.getElementById(id)?.classList.add('lit'), i * 5000);
+  });
+}
+
+// ── Webhook Call ──────────────────────────────────────────────────────────
+function callWebhook() {
+  const body = Object.entries(formData)
+    .map(([k,val]) => encodeURIComponent(k) + '=' + encodeURIComponent(val))
+    .join('&');
+  fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded'},
+    body
+  })
+  .then(r => { if (!r.ok) throw new Error('Server returned ' + r.status); return r.text(); })
+  .then(html => {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('resultBody').innerHTML = html;
+    document.getElementById('resultState').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  })
+  .catch(err => {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errMsg').textContent =
+      'Could not reach the assessment service (' + err.message + '). Please try again.';
+    document.getElementById('errorState').classList.add('show');
+  });
+}
+
+function retryCall() {
+  document.getElementById('errorState').classList.remove('show');
+  startLoading();
+  callWebhook();
+}
+
+// ── Restart ───────────────────────────────────────────────────────────────
+function restart() {
+  formData = {};
+  const dyn = document.getElementById('dynamicQuestions');
+  if (dyn) dyn.innerHTML = '';
+  ['country','nationality','purpose'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const rb = document.getElementById('resultBody');
+  if (rb) rb.innerHTML = '';
+  document.getElementById('resultState')?.classList.remove('show');
+  document.getElementById('errorState')?.classList.remove('show');
+  showPage(1);
+}
+
+// ── Export Report ─────────────────────────────────────────────────────────
+function exportReport() {
+  const oldTitle = document.title;
+  const country  = (formData.country||'assessment').replace(/[^a-z0-9]+/gi,'-').replace(/^-+|-+$/g,'');
+  document.title = `RemotePass-Immigration-Report-${country||'assessment'}`;
+  window.print();
+  setTimeout(() => { document.title = oldTitle; }, 500);
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function v(id)       { const e=document.getElementById(id); return e?e.value:''; }
+function selText(id) { const e=document.getElementById(id); return e?e.options[e.selectedIndex]?.text||'':''; }
+function markErr(fid,eid) {
+  const f=document.getElementById(fid); if(f) f.classList.add('invalid');
+  const e=document.getElementById(eid); if(e) e.classList.add('show');
+}
+function clearErr(fid,eid) {
+  const f=document.getElementById(fid); if(f) f.classList.remove('invalid');
+  const e=document.getElementById(eid); if(e) e.classList.remove('show');
+}
+function showPage(n) {
+  [1,2,3].forEach(i => {
+    document.getElementById('page'+i)?.classList.toggle('active', i===n);
+    const ps=document.getElementById('ps'+i);
+    if(ps){ps.classList.toggle('active',i===n);ps.classList.toggle('done',i<n);}
+  });
+  const fills={1:'0%',2:'50%',3:'100%'};
+  const pf = document.getElementById('progFill');
+  if(pf) pf.style.width = fills[n]||'0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => { loadFormConfig(); });
+</script>
+</body>
